@@ -6,7 +6,8 @@
 
 typedef struct _arc {
 
-    face* parent;
+    face* parent; // vertex source
+    edge* reverse;
     
     struct _arc* prev;
     struct _arc* next;
@@ -14,5 +15,24 @@ typedef struct _arc {
     vertex_event* pinch;
 
 } arc;
+
+typedef struct _line {
+
+    arc* lbound;
+    arc* tbound;
+    arc* rbound;
+
+    vertex bottom_left_corner;
+    vertex top_right_corner;
+
+} line;
+
+line* create_line( vertex ll, vertex tr );
+
+void destroy_line( line* l );
+
+void insert_segment( line* l, face* parent, vertex_list* vlist );
+
+void pinch_off_segment( line* l, vertex_event* v_event );
 
 #endif

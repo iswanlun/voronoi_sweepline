@@ -9,22 +9,36 @@ typedef struct _vertex {
 
 typedef struct _edge {
 
-    vertex vp;
-    vertex vn;
+    vertex origin; // clockwise
 
-    struct _edge* prev;
     struct _edge* next;
+    struct _edge* twin;
 
 } edge;
 
 typedef struct _face {
 
-    float x, y;
+    vertex incident;
     
     edge top_edge;
-    edge* left;
-    edge* right;
 
 } face;
+
+typedef struct _face_list {
+
+    face* collection;
+
+    int size;
+    int index;
+
+} face_list;
+
+face_list* create_face_list( vertex* sites, int size );
+
+float next_face_y( face_list* list );
+
+face* pop_next_face( face_list* list );
+
+void destroy_face_list( face_list* list );
 
 #endif
