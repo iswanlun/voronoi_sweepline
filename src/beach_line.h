@@ -2,6 +2,7 @@
 #define BEACH_LINE_H
 
 #include "faces.h"
+#include "events.h"
 
 typedef struct _arc {
 
@@ -9,6 +10,8 @@ typedef struct _arc {
     
     struct _arc* prev;
     struct _arc* next;
+
+    vertex_event* pinch;
 
 } arc;
 
