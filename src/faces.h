@@ -35,7 +35,7 @@ typedef struct _face_list {
 
 face_list* create_face_list( vertex* sites, int size );
 
-float next_face_y( face_list* list );
+face* peek_next_face( face_list* list );
 
 face* pop_next_face( face_list* list );
 

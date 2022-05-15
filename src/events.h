@@ -15,7 +15,7 @@ typedef struct _vertex_list {
 
 } vertex_list;
 
-void vertex_insert_event( vertex_list* list, float sweep_y );
+vertex_event* vertex_insert_event( vertex_list* list, vertex_event* current, float sweep_y );
 
 void vertex_next_event( vertex_list* list, vertex_event* destination );
 

@@ -18,9 +18,11 @@ typedef struct _arc {
 
 typedef struct _line {
 
-    arc* lbound;
-    arc* tbound;
-    arc* rbound;
+    face* lbound;
+    face* tbound;
+    face* rbound;
+
+    arc* head;
 
     vertex bottom_left_corner;
     vertex top_right_corner;
