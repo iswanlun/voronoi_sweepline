@@ -19,7 +19,6 @@ typedef struct _arc {
 typedef struct _line {
 
     face* root;
-
     arc* head;
 
     vertex bottom_left_corner;

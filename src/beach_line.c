@@ -136,6 +136,27 @@ void insert_segment( line* l, face* parent, vertex_list* vlist ) {
 
 }
 
+void pinch_off_segment( line* l, vertex_event* v_event ) {
+
+    arc* search = l->head;
+
+    while ( search != NULL ) {
+
+        if ( search->pinch == v_event ) {
+
+
+            vertex bp = find_break_point( l, search, search->next );
+
+
+
+        }
+
+        search = search -> next;
+    } 
+
+    // note an error
+}
+
 arc* create_arc( face* parent ) {
 
     arc* new_arc = (arc*) malloc( sizeof(arc) );
