@@ -18,9 +18,7 @@ typedef struct _arc {
 
 typedef struct _line {
 
-    face* lbound;
-    face* tbound;
-    face* rbound;
+    face* root;
 
     arc* head;
 
@@ -36,5 +34,7 @@ void destroy_line( line* l );
 void insert_segment( line* l, face* parent, vertex_list* vlist );
 
 void pinch_off_segment( line* l, vertex_event* v_event );
+
+arc* create_arc( face* parent );
 
 #endif

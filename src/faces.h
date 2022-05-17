@@ -18,8 +18,7 @@ typedef struct _edge {
 
 typedef struct _face {
 
-    vertex incident;
-    
+    vertex site;
     edge top_edge;
 
 } face;

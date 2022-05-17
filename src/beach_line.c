@@ -8,122 +8,66 @@ line* create_line( vertex ll, vertex tr ) {
     result->bottom_left_corner = ll;
     result->top_right_corner = tr;
 
-    // arcs
+    // root face and arc
 
-    result->lbound  = (face*) malloc( sizeof( face ) );
-    result->tbound  = (face*) malloc( sizeof( face ) );
-    result->rbound  = (face*) malloc( sizeof( face ) );
+    result->root  = (face*) malloc( sizeof( face ) );
+    result->head = create_arc( result->root );
 
-    // lbound
+    result->head->reverse->origin = tr;
+    result->head->reverse->next = &(result->root->top_edge);
 
-    edge* l_rev = (edge*) malloc( sizeof(edge) );
-    l_rev->origin.x = ll.x;
-    l_rev->origin.y = tr.y;
-    l_rev->next = &result->lbound->top_edge;
-    l_rev->twin = NULL;
-
-    result->lbound->top_edge.origin = ll;
-    result->lbound->top_edge.next = l_rev;
-    result->lbound->top_edge.twin = NULL;
-
-    // tbound
-
-    edge* t_rev = (edge*) malloc( sizeof(edge) );
-    t_rev->origin = tr;
-    t_rev->next = &result->tbound->top_edge;
-    t_rev->twin = NULL;
-
-    result->tbound->top_edge.origin.x = ll.x;
-    result->tbound->top_edge.origin.y = tr.y;
-    result->tbound->top_edge.next = t_rev;
-    result->tbound->top_edge.twin = NULL;
-
-    // rbound
-
-    edge* r_rev = (edge*) malloc( sizeof(edge) );
-    r_rev->origin.x = tr.x;
-    r_rev->origin.y = ll.y;
-    r_rev->next = &result->rbound->top_edge;
-    r_rev->twin = NULL;
-
-    result->rbound->top_edge.origin = tr;
-    result->rbound->top_edge.next = r_rev;
-    result->rbound->top_edge.twin = NULL;
-
-    // arcs
-
-    result->head    = (arc*) malloc( sizeof(arc) );
-    arc* first      = (arc*) malloc( sizeof(arc) );
-    arc* second     = (arc*) malloc( sizeof(arc) );
-
-    result->head->next = first;
-    result->head->prev = NULL;
-    result->head->parent = result->lbound;
-    result->head->reverse = l_rev;
-
-    first->prev = result->head;
-    first->next = second;
-    first->parent = result->tbound;
-    first->reverse = t_rev;
-
-    second->prev = first;
-    second->next = NULL;
-    second->parent = result->rbound;
-    second->reverse = r_rev;
+    result->root->top_edge.origin.x = ll.x;
+    result->root->top_edge.origin.y = tr.y;
+    result->root->top_edge.next = result->head->reverse;
+    result->root->top_edge.twin = NULL;
 
     return result;
 }
 
 vertex find_break_point( line* l, arc* left, arc* right ) {
 
-    if ( left == NULL ) {
-        return right->parent->top_edge.origin;
-    } else if ( right == NULL ) {
-        return left->parent->top_edge.next->origin;
-    } else {
-
-        // import math from tool
-
-    }
-}
-
-float intersect_two_points_and_line( arc* local, arc* point, float x ) {
-
-}
-
-float circumcenter_event_y( vertex* v1, vertex* v2, vertex* v3 ) {
 
     // import math from tool
 
+    
 }
 
 void recalculate_vertex_events( arc* local, line* l, vertex_list* vlist ) {
 
-    if ( local != l->lbound && local != l->rbound ) {
+    // point left and righ are the same -> no vertex event
+    
+    if ( local->next->parent == local->prev->parent ) {
+        return;
+    }
+    
+    // if local is root and head or tail -> no vertex event
+    if ( local == l->head || local->next == NULL ) {
+        return;
+    }
+    
+    // special case L - P - P
+    if ( local->prev == l->head ) {
 
-        float y;
+        if ( local->next->parent->site.x < local->parent->site.x ) {
 
-        if ( local->prev == l->lbound ) {
-
-            if ( local == l->tbound ) {
-                // distance from corner is vertical off off point
-            } else {
-                // intersection between line and outer bound
-            }
-
-        } else if ( local->next == l->rbound ) {
-
-            if ( local == l->tbound ) {
-                // distance from corner is vertical off off point
-            } else {
-                // intersection between line and outer bound
-            }
-
-        } else {
-            y = circumcenter_event_y(&local->prev->parent->incident, &local->parent->incident, &local->next->parent->incident);
         }
 
-        local->pinch = vertex_insert_event( vlist, local->pinch, y );
+
+    } else if ( local->next->next == NULL ) { // special case P - P - L 
+
+        if ( local->prev->parent->site.x > local->parent->site.x ) {
+
+        }
+    
+    
+    } else if ( local->parent == l->root ) { // special case P - L - P
+
+
+
+    } else { // P - P - P
+
+        // circumcenter
+    
     }
 }
 
@@ -137,12 +81,12 @@ void insert_segment( line* l, face* parent, vertex_list* vlist ) {
         vertex bpl = find_break_point( l, search_head->prev, search_head );
         vertex bpr = find_break_point( l, search_head, search_head->next );
 
-        if ( bpl.x <= parent->incident.x && parent->incident.x < bpr.x ) {
+        if ( bpl.x <= parent->site.x && parent->site.x < bpr.x ) {
             
             // split the arc
             
-            arc* new_center = (arc*) malloc( sizeof(arc) );
-            arc* new_left = (arc*) malloc( sizeof(arc) );
+            arc* new_center = create_arc( parent );
+            arc* new_left = create_arc( search_head->parent );
             arc* far_left = search_head->prev;
 
             far_left->next = new_left;
@@ -156,25 +100,25 @@ void insert_segment( line* l, face* parent, vertex_list* vlist ) {
 
             // split the edge
 
-            new_center->parent = parent;
-            new_left->parent = search_head->parent;
-
-            edge* left_rev = (edge*) malloc( sizeof(edge) );
-            edge* center_rev = (edge*) malloc( sizeof(edge) );
+            edge* left_rev = new_left->reverse;
+            edge* center_rev = new_center->reverse;
             
             edge* new_reverse = (edge*) malloc( sizeof(edge) );
             edge* exit = search_head->reverse->next;
 
-            search_head->reverse->next = center_rev;
-            center_rev->next = left_rev;
+            search_head->reverse->next = new_reverse;
+            new_reverse->next = left_rev;
             left_rev->next = exit;
 
-            center_rev->twin = &parent->top_edge;
-            parent->top_edge.twin = center_rev;
-            parent->top_edge.next = new_reverse;
-            new_reverse->next = &parent->top_edge;
+            new_reverse->twin = &(parent->top_edge);
+            parent->top_edge.twin = new_reverse;
 
-            new_center->reverse = new_reverse;
+            parent->top_edge.next = center_rev;
+            center_rev->next = &(parent->top_edge);
+
+            if ( search_head == l->head ) {
+                l->head = new_left;
+            }
 
             // recalulate vertex_events
 
@@ -190,4 +134,19 @@ void insert_segment( line* l, face* parent, vertex_list* vlist ) {
      
     // note an error
 
+}
+
+arc* create_arc( face* parent ) {
+
+    arc* new_arc = (arc*) malloc( sizeof(arc) );
+    new_arc->parent = parent;
+    new_arc->next = NULL;
+    new_arc->prev = NULL;
+    new_arc->pinch = NULL;
+
+    new_arc->reverse = (edge*) malloc( sizeof(edge) );
+    new_arc->reverse->next = NULL;
+    new_arc->reverse->twin = NULL;
+
+    return new_arc;
 }
