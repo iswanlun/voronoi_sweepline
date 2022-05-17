@@ -32,7 +32,7 @@ void destroy_line( line* l );
 
 void insert_segment( line* l, face* parent, vertex_list* vlist );
 
-void pinch_off_segment( line* l, vertex_event* v_event );
+void pinch_out_segment( line* l, vertex_event* v_event );
 
 arc* create_arc( face* parent );
 

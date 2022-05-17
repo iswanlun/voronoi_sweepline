@@ -37,6 +37,7 @@ void recalculate_vertex_events( arc* local, line* l, vertex_list* vlist ) {
     // point left and righ are the same -> no vertex event
     
     if ( local->next->parent == local->prev->parent ) {
+
         return;
     }
     
@@ -75,9 +76,10 @@ void insert_segment( line* l, face* parent, vertex_list* vlist ) {
 
     arc* search_head = l->head;
 
+    vertex bpl = find_break_point( l, search_head->prev, search_head );
+
     while ( search_head != NULL ) {
 
-        vertex bpl = find_break_point( l, search_head->prev, search_head );
         vertex bpr = find_break_point( l, search_head, search_head->next );
 
         if ( bpl.x <= parent->site.x && parent->site.x < bpr.x ) {
@@ -128,6 +130,7 @@ void insert_segment( line* l, face* parent, vertex_list* vlist ) {
             return;
         }
 
+        bpl = bpr;
         search_head = search_head -> next;
     }
      
@@ -135,7 +138,7 @@ void insert_segment( line* l, face* parent, vertex_list* vlist ) {
 
 }
 
-void pinch_off_segment( line* l, vertex_event* v_event ) {
+void pinch_out_segment( line* l, vertex_event* v_event ) {
 
     arc* search = l->head;
 
