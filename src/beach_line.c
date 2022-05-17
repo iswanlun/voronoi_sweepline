@@ -71,7 +71,6 @@ void recalculate_vertex_events( arc* local, line* l, vertex_list* vlist ) {
     }
 }
 
-
 void insert_segment( line* l, face* parent, vertex_list* vlist ) {
 
     arc* search_head = l->head;
@@ -144,11 +143,50 @@ void pinch_off_segment( line* l, vertex_event* v_event ) {
 
         if ( search->pinch == v_event ) {
 
-
             vertex bp = find_break_point( l, search, search->next );
 
+            // center arc
 
+            edge* lead = search->next->reverse->next->twin;
 
+            lead->next = search->reverse->next;
+            lead->next->origin = bp;
+
+            // center strike
+
+            edge* strike_right = (edge*) malloc( sizeof(edge) );
+            edge* strike_left = (edge*) malloc( sizeof(edge) );
+
+            strike_right->twin = strike_left;
+            strike_left->twin = strike_right;
+
+            // right arc
+
+            edge* right_lead = lead->twin;
+            right_lead->origin = bp;
+
+            strike_right->next = right_lead;
+            search->next->reverse->next = strike_right;
+
+            // left arc
+
+            edge* left_lead = lead->next->twin;
+            left_lead->next = strike_left;
+            strike_left->origin = bp;
+            strike_left->next = search->prev->reverse;
+
+            // arc removal
+
+            arc* right = search->next;
+            arc* left = search->prev;
+
+            right->prev = left;
+            left->next = right;
+
+            free(search->reverse);
+            free(search);
+
+            return;
         }
 
         search = search -> next;
