@@ -213,10 +213,19 @@ arc* create_arc( face* parent ) {
     return new_arc;
 }
 
-float arc_heading( arc* self, float x, float s, float y) {
+float arc_cap( arc* self, float x, float s, float y ) {
 
+    return 2 * (self->parent->top_edge.origin.y - y);
 }
 
-float arc_wall( arc* self, float x, float s, float y) {
-    
+float arc_wall( arc* self, float x, float s, float y ) {
+
+    return 2 * (self->parent->top_edge.origin.x - x);   
+}
+
+float arc_face( arc* self, float x, float s, float y ) {
+
+    float p = ((self->parent->site.y - s) / 2);
+    return ((powf((x - self->parent->site.x), 2) / (4 * p)) + (self->parent->site.y - p)) - y;
+
 }
