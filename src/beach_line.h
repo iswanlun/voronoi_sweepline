@@ -13,15 +13,18 @@ typedef struct _arc {
 
     vertex_event* pinch;
 
+    float (*eval) (struct _arc*, float, float, float); // self, x, s, y
+
 } arc;
 
 typedef struct _line {
 
-    face* root;
     arc* head;
 
     vertex bottom_left_corner;
     vertex top_right_corner;
+
+    face* bounds[4];
 
 } line;
 

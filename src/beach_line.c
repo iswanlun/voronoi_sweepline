@@ -4,45 +4,36 @@
 
 line* create_line( vertex ll, vertex tr ) {
 
-    line* result = (line*) malloc( sizeof(line) );
+    line* beach_line = (line*) malloc( sizeof(line) );
 
-    result->bottom_left_corner = ll;
-    result->top_right_corner = tr;
+    beach_line->bottom_left_corner = ll;
+    beach_line->top_right_corner = tr;
 
-    // root face and arc
+    arc* head = NULL;
 
-    result->root  = (face*) malloc( sizeof( face ) );
-    result->head = create_arc( result->root );
+    for ( int i = 0; i < 4; i++ ) {
+        beach_line->bounds[i] = (face*) malloc( sizeof(face) );
+        
+        arc* place = create_arc( beach_line->bounds[i] ); 
 
-    result->head->reverse->origin = tr;
-    result->head->reverse->next = &(result->root->top_edge);
+        place->prev = head;
+        head = place;
+    }
 
-    result->root->top_edge.origin.x = ll.x;
-    result->root->top_edge.origin.y = tr.y;
-    result->root->top_edge.next = result->head->reverse;
-    result->root->top_edge.twin = NULL;
+    arc* last = head;
 
-    return result;
+    while( head != NULL ) {
+        head = head->prev;
+    }
+
+    head
+
+    return beach_line;
 }
 
 vertex find_break_point( line* l, arc* left, arc* right ) {
 
-    if ( left->parent == l->root ) {
 
-        return l->root->top_edge.next->origin;
-
-    } else if ( right->parent == l->root ) {
-
-        return l->root->top_edge.origin;
-
-    } else {
-
-        
-
-    }
-
-
-    // import math from tool
 }
 
 vertex circumcenter( arc* a1, arc* a2, arc* a3 ) {
@@ -76,38 +67,7 @@ void point_line_v_event( arc* local, line* l, vertex_list* vlist ) {
 
 void recalculate_vertex_events( arc* local, line* l, vertex_list* vlist ) {
 
-    // point left and righ are the same -> no vertex event
-    if ( local->next->parent == local->prev->parent ) {
-        return;
-    }
     
-    // if local is root and head or tail -> no vertex event
-    if ( local == l->head || local->next == NULL ) {
-        return;
-    }
-    
-    // special case L - P - P
-    if ( local->prev->parent == l->root ) {
-
-        if ( local->next->parent->site.x < local->parent->site.x ) {
-            point_line_v_event( local, l, vlist );
-        }
-
-
-    } else if ( local->next->parent == l->root ) { // special case P - P - L 
-
-        if ( local->prev->parent->site.x > local->parent->site.x ) {
-            point_line_v_event( local, l, vlist );
-        }
-    
-    } else if ( local->parent == l->root ) { // special case P - L - P
-        point_line_v_event( local, l, vlist );
-
-    } else { // P - P - P
-
-        // circumcenter
-    
-    }
 }
 
 void insert_segment( line* l, face* parent, vertex_list* vlist ) {
@@ -249,4 +209,12 @@ arc* create_arc( face* parent ) {
     new_arc->reverse->twin = NULL;
 
     return new_arc;
+}
+
+float arc_heading( arc* self, float x, float s, float y) {
+
+}
+
+float arc_wall( arc* self, float x, float s, float y) {
+    
 }
