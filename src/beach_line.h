@@ -1,7 +1,6 @@
 #ifndef BEACH_LINE_H
 #define BEACH_LINE_H
 
-#include "faces.h"
 #include "events.h"
 
 typedef struct _arc {

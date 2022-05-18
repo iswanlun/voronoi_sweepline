@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 #include "beach_line.h"
 
 line* create_line( vertex ll, vertex tr ) {
@@ -26,18 +27,57 @@ line* create_line( vertex ll, vertex tr ) {
 
 vertex find_break_point( line* l, arc* left, arc* right ) {
 
+    if ( left->parent == l->root ) {
+
+        return l->root->top_edge.next->origin;
+
+    } else if ( right->parent == l->root ) {
+
+        return l->root->top_edge.origin;
+
+    } else {
+
+        
+
+    }
+
 
     // import math from tool
+}
 
-    
+vertex circumcenter( arc* a1, arc* a2, arc* a3 ) {
+
+}
+
+inline float point_distance( vertex* p1, vertex* p2 ) {
+
+    return sqrtf(powf((p2->x - p1->x), 2) + powf((p2->y - p2->y), 2));
+
+}
+
+inline float top_intersect( arc* a1, arc* a2, float line_y ) {
+
+    float m = (( -1 * (a2->parent->site.x - a1->parent->site.x)) / (a2->parent->site.y - a1->parent->site.y) );
+    float b = ((powf(a2->parent->site.x, 2) - powf(a1->parent->site.x, 2)) + (powf(a2->parent->site.y, 2) - powf(a1->parent->site.y, 2))) / (2 * (a2->parent->site.y - a1->parent->site.y));
+    return ((line_y - b) / m);
+}
+
+void point_line_v_event( arc* local, line* l, vertex_list* vlist ) {
+
+    vertex site;
+    site.x = top_intersect( local, local->next, l->top_right_corner.y );
+    site.y = l->top_right_corner.y;
+
+    float y_trigger = site.y - point_distance(&site, &(local->next->parent->site));
+
+    insert_vertex_event(vlist, &(local->pinch), site.x, site.y, y_trigger);
+
 }
 
 void recalculate_vertex_events( arc* local, line* l, vertex_list* vlist ) {
 
     // point left and righ are the same -> no vertex event
-    
     if ( local->next->parent == local->prev->parent ) {
-
         return;
     }
     
@@ -47,23 +87,21 @@ void recalculate_vertex_events( arc* local, line* l, vertex_list* vlist ) {
     }
     
     // special case L - P - P
-    if ( local->prev == l->head ) {
+    if ( local->prev->parent == l->root ) {
 
         if ( local->next->parent->site.x < local->parent->site.x ) {
-
+            point_line_v_event( local, l, vlist );
         }
 
 
-    } else if ( local->next->next == NULL ) { // special case P - P - L 
+    } else if ( local->next->parent == l->root ) { // special case P - P - L 
 
         if ( local->prev->parent->site.x > local->parent->site.x ) {
-
+            point_line_v_event( local, l, vlist );
         }
     
-    
     } else if ( local->parent == l->root ) { // special case P - L - P
-
-
+        point_line_v_event( local, l, vlist );
 
     } else { // P - P - P
 

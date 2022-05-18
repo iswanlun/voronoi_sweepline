@@ -1,8 +1,11 @@
 #ifndef EVENTS_H
 #define EVENTS_H
 
+#include "faces.h"
+
 typedef struct _vertex_event {
 
+    vertex v_site;
     float sweep_y;
 
     struct _vertex_event* next;    
@@ -15,12 +18,14 @@ typedef struct _vertex_list {
 
 } vertex_list;
 
-void vertex_insert_event( vertex_list* list, vertex_event* event );
+void insert_vertex_event( vertex_list* list, vertex_event** event, float v_x, float v_y, float sweep_y );
 
-void vertex_next_event( vertex_list* list, vertex_event* destination );
+void next_vertex_event( vertex_list* list, vertex_event* dest );
 
-vertex_list* vertex_create_list( void );
+void remove_vertex_event( vertex_list* list, vertex_event* dest );
 
-void vertex_dispose_list( vertex_list* list );
+vertex_list* create_vertex_list( void );
+
+void dispose_vertex_list( vertex_list* list );
 
 #endif
