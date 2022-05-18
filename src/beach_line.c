@@ -22,11 +22,13 @@ line* create_line( vertex ll, vertex tr ) {
 
     arc* last = head;
 
-    while( head != NULL ) {
+    while ( head->prev != NULL ) {
+        head->prev->next = head;
         head = head->prev;
     }
 
-    head
+    head->prev = last;
+    last->next = head;
 
     return beach_line;
 }
