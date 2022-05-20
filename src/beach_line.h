@@ -13,7 +13,9 @@ typedef struct _arc {
 
     vertex_event* pinch;
 
-    float (*eval) (struct _arc*, float, float, float); // self, x, s, y
+    vertex (*solve) (struct _arc*, float);              // self, s
+    float (*eval) (struct _arc*, float, float );        // self, s, x
+    float (*diff) (struct _arc*, float, float, float);  // self, x, s, y
 
 } arc;
 

@@ -2,6 +2,10 @@
 #include <math.h>
 #include "beach_line.h"
 
+#define DIR(v1, v2) (((v2.x > v1.x) ? 0xF0 : 0x0) & ((v2.y > v2.x) ? 0xF : 0x0))
+
+#define TOLERANCE 0.01
+
 line* create_line( vertex ll, vertex tr ) {
 
     line* beach_line = (line*) malloc( sizeof(line) );
@@ -30,57 +34,71 @@ line* create_line( vertex ll, vertex tr ) {
     head->prev = last;
     last->next = head;
 
+    // finish setup
+
     return beach_line;
 }
 
-vertex find_break_point( line* l, arc* left, arc* right ) {
+vertex find_break_point( arc* left, float sweep_y ) {
 
-
-}
-
-vertex circumcenter( arc* a1, arc* a2, arc* a3 ) {
-
+    return left->solve( left, sweep_y );
 }
 
 inline float point_distance( vertex* p1, vertex* p2 ) {
 
     return sqrtf(powf((p2->x - p1->x), 2) + powf((p2->y - p2->y), 2));
-
 }
 
-inline float top_intersect( arc* a1, arc* a2, float line_y ) {
+float vertex_event_to( arc* local, char prev_direction, float prev_s, float delta_0, float delta_1 ) {
 
-    float m = (( -1 * (a2->parent->site.x - a1->parent->site.x)) / (a2->parent->site.y - a1->parent->site.y) );
-    float b = ((powf(a2->parent->site.x, 2) - powf(a1->parent->site.x, 2)) + (powf(a2->parent->site.y, 2) - powf(a1->parent->site.y, 2))) / (2 * (a2->parent->site.y - a1->parent->site.y));
-    return ((line_y - b) / m);
+    vertex v1 = find_break_point(local->prev, prev_s + delta_1);
+    vertex v2 = find_break_point(local, prev_s + delta_1);
+
+    if (point_distance(&v1, &v2) < TOLERANCE) {
+        return prev_s + delta_1;
+
+    } else {
+
+        char new_direction = DIR(v1, v2);
+
+        if (new_direction != prev_direction) { // reversal
+            return vertex_event_to( local, new_direction, prev_s + delta_1, 0, (delta_1 / -2) );
+
+        } else {
+            return vertex_event_to( local, new_direction, prev_s + delta_1, delta_1, delta_0 + delta_1 );
+        }
+    }
 }
 
-void point_line_v_event( arc* local, line* l, vertex_list* vlist ) {
+void recalculate_vertex_event( arc* local, line* l, vertex_list* vlist, float current_s ) {
 
-    vertex site;
-    site.x = top_intersect( local, local->next, l->top_right_corner.y );
-    site.y = l->top_right_corner.y;
+    if ( local->next->parent == local->prev->parent || 
+         (local->prev->parent->site.y >= local->parent->site.y && local->next->parent->site.y >= local->parent->site.y) ) {
+        
+        null_vertex_event( vlist, local->pinch );
 
-    float y_trigger = site.y - point_distance(&site, &(local->next->parent->site));
+    } else {
 
-    insert_vertex_event(vlist, &(local->pinch), site.x, site.y, y_trigger);
+        vertex v1 = find_break_point(local->prev, current_s);
+        vertex v2 = find_break_point(local, current_s);
 
-}
+        float adjusted_s = vertex_event_to( local, DIR(v1, v2), current_s, 0, -1 );
 
-void recalculate_vertex_events( arc* local, line* l, vertex_list* vlist ) {
-
+        vertex v3 = find_break_point( local, adjusted_s );
     
+        insert_vertex_event( vlist, &(local->pinch), v3.x, v3.y, adjusted_s );
+    }
 }
 
-void insert_segment( line* l, face* parent, vertex_list* vlist ) {
+void insert_segment( line* l, face* parent, vertex_list* vlist ) { // refactor to recusive search
 
     arc* search_head = l->head;
 
-    vertex bpl = find_break_point( l, search_head->prev, search_head );
+    // vertex bpl = find_break_point( l, search_head->prev, search_head );
 
     while ( search_head != NULL ) {
 
-        vertex bpr = find_break_point( l, search_head, search_head->next );
+        // vertex bpr = find_break_point( l, search_head, search_head->next );
 
         if ( bpl.x <= parent->site.x && parent->site.x < bpr.x ) {
             
@@ -123,9 +141,9 @@ void insert_segment( line* l, face* parent, vertex_list* vlist ) {
 
             // recalulate vertex_events
 
-            recalculate_vertex_events( new_left, l , vlist );
-            recalculate_vertex_events( new_center, l , vlist );
-            recalculate_vertex_events( search_head, l , vlist );
+            recalculate_vertex_event( new_left, l , vlist );
+            recalculate_vertex_event( new_center, l , vlist );
+            recalculate_vertex_event( search_head, l , vlist );
 
             return;
         }
@@ -138,7 +156,7 @@ void insert_segment( line* l, face* parent, vertex_list* vlist ) {
 
 }
 
-void pinch_out_segment( line* l, vertex_event* v_event ) {
+void pinch_out_segment( line* l, vertex_event* v_event ) { // refactor to recursive
 
     arc* search = l->head;
 
@@ -146,7 +164,7 @@ void pinch_out_segment( line* l, vertex_event* v_event ) {
 
         if ( search->pinch == v_event ) {
 
-            vertex bp = find_break_point( l, search, search->next );
+            // vertex bp = find_break_point( l, search, search->next );
 
             // center arc
 
@@ -213,19 +231,82 @@ arc* create_arc( face* parent ) {
     return new_arc;
 }
 
-float arc_cap( arc* self, float x, float s, float y ) {
+float arc_rec( arc* self, float s, float x, float prev_diff, float delta_0, float delta_1 ) {
 
-    return 2 * (self->parent->top_edge.origin.y - y);
+    if ( prev_diff > TOLERANCE ) {
+
+        float this_x = x + delta_1;
+        float self_y = self->eval( self, s, this_x );
+        float this_diff = self->next->diff( self->next, this_x, s, self_y );
+
+        if ( this_diff < 0 ) {
+            return arc_rec( self, s, this_x, this_diff, 0, (delta_1 / 2) );
+        } else {
+            return arc_rec( self, s, this_x, this_diff, delta_1, delta_0 + delta_1 );
+        }
+
+    } else if ( prev_diff < -TOLERANCE ) {
+
+        float this_x = x - delta_1;
+        float self_y = self->eval( self, s, this_x );
+        float this_diff = self->next->diff( self->next, this_x, s, self_y );
+
+        if ( this_diff > 0 ) {
+            return arc_rec( self, s, this_x, this_diff, 0, (delta_1 / 2) );
+        } else {
+            return arc_rec( self, s, this_x, this_diff, delta_1, delta_0 + delta_1 );
+        }
+
+    } else {
+        return x;
+    }
 }
 
-float arc_wall( arc* self, float x, float s, float y ) {
+float eval_cap( arc* self, float s, float x ) {
 
-    return 2 * (self->parent->top_edge.origin.x - x);   
+    return self->parent->site.y;
 }
 
-float arc_face( arc* self, float x, float s, float y ) {
+float diff_cap( arc* self, float x, float s, float y ) {
+
+    return self->parent->site.y - y;
+}
+
+vertex solve_cap( arc* self, float s ) {
+
+    vertex fin;
+    float x = self->next->parent->site.x;
+    fin.y = self->parent->site.y;
+    fin.x = arc_rec( self, s, x, self->next->diff(self->next, x, s, fin.y), 0, 1 );
+    
+    return fin;
+}
+
+float eval_wall( arc* self, float s, float x ) {
+
+    return 0;
+}
+
+float diff_wall( arc* self, float x, float s, float y ) {
+
+    if ( x < ( self->parent->site.x - TOLERANCE ) ) {
+        return 1;
+
+    } else if ( x > ( self->parent->site.x + TOLERANCE )) {
+        return -1;
+
+    } else {
+        return 0;
+    }
+}
+
+float eval_arc( arc* self, float s, float x ) {
 
     float p = ((self->parent->site.y - s) / 2);
-    return ((powf((x - self->parent->site.x), 2) / (4 * p)) + (self->parent->site.y - p)) - y;
+    return (powf((x - self->parent->site.x), 2) / (4 * p)) + (self->parent->site.y - p);
+}
 
+float diff_arc( arc* self, float x, float s, float y ) {
+
+    return eval_arc( self, x, s ) - y;
 }

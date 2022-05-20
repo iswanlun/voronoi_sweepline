@@ -22,7 +22,7 @@ void insert_vertex_event( vertex_list* list, vertex_event** event, float v_x, fl
 
 void next_vertex_event( vertex_list* list, vertex_event* dest );
 
-void remove_vertex_event( vertex_list* list, vertex_event* dest );
+void null_vertex_event( vertex_list* list, vertex_event* dest );
 
 vertex_list* create_vertex_list( void );
 
