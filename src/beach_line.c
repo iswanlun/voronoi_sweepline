@@ -34,7 +34,7 @@ line* create_line( vertex ll, vertex tr ) {
     head->prev = last;
     last->next = head;
 
-    // finish setup
+    // TODO: finish setup
 
     return beach_line;
 }
@@ -90,7 +90,7 @@ void recalculate_vertex_event( arc* local, line* l, vertex_list* vlist, float cu
     }
 }
 
-void insert_segment( line* l, face* parent, vertex_list* vlist ) { // refactor to recusive search
+void insert_segment( line* l, face* parent, vertex_list* vlist ) { // TODO: refactor to recusive search
 
     arc* search_head = l->head;
 
@@ -153,10 +153,9 @@ void insert_segment( line* l, face* parent, vertex_list* vlist ) { // refactor t
     }
      
     // note an error
-
 }
 
-void pinch_out_segment( line* l, vertex_event* v_event ) { // refactor to recursive
+void pinch_out_segment( line* l, vertex_event* v_event ) { // TODO: refactor to recursive
 
     arc* search = l->head;
 
@@ -282,7 +281,7 @@ vertex solve_cap( arc* self, float s ) {
     return fin;
 }
 
-float eval_wall( arc* self, float s, float x ) {
+float eval_wall( arc* self, float s, float x ) { // this should never be used
 
     return 0;
 }
@@ -309,4 +308,29 @@ float eval_arc( arc* self, float s, float x ) {
 float diff_arc( arc* self, float x, float s, float y ) {
 
     return eval_arc( self, x, s ) - y;
+}
+
+vertex solve_arc( arc* self, float s ) {
+
+    vertex fin;
+    float x;
+    if ( self->parent->site.y < self->next->parent->site.y ) {
+        x = self->parent->site.x;
+    } else {
+        x = self->next->parent->site.x;
+    }
+
+    fin.y = self->eval( self, s, x );
+    fin.x = arc_rec( self, s, x, self->next->diff(self->next, x, s, fin.y), 0, 1 );
+    fin.y = self->eval( self, s, fin.x );
+
+    return fin;
+}
+
+vertex solve_wall( arc* self, float s ) {
+
+    vertex fin;
+    fin.x = self->parent->site.x;
+    fin.y = self->next->eval( self->next, s, fin.x );
+    return fin;
 }
