@@ -6,39 +6,6 @@
 
 #define TOLERANCE 0.01
 
-line* create_line( vertex ll, vertex tr ) {
-
-    line* beach_line = (line*) malloc( sizeof(line) );
-
-    beach_line->bottom_left_corner = ll;
-    beach_line->top_right_corner = tr;
-
-    arc* head = NULL;
-
-    for ( int i = 0; i < 4; i++ ) {
-        beach_line->bounds[i] = (face*) malloc( sizeof(face) );
-        
-        arc* place = create_arc( beach_line->bounds[i] ); 
-
-        place->prev = head;
-        head = place;
-    }
-
-    arc* last = head;
-
-    while ( head->prev != NULL ) {
-        head->prev->next = head;
-        head = head->prev;
-    }
-
-    head->prev = last;
-    last->next = head;
-
-    // TODO: finish setup
-
-    return beach_line;
-}
-
 vertex find_break_point( arc* left, float sweep_y ) {
 
     return left->solve( left, sweep_y );
@@ -70,7 +37,7 @@ float vertex_event_to( arc* local, char prev_direction, float prev_s, float delt
     }
 }
 
-void recalculate_vertex_event( arc* local, line* l, vertex_list* vlist, float current_s ) {
+void recalculate_vertex_event( arc* local, vertex_list* vlist, float current_s ) {
 
     if ( local->next->parent == local->prev->parent || 
          (local->prev->parent->site.y >= local->parent->site.y && local->next->parent->site.y >= local->parent->site.y) ) {
@@ -90,15 +57,15 @@ void recalculate_vertex_event( arc* local, line* l, vertex_list* vlist, float cu
     }
 }
 
-void insert_segment( line* l, face* parent, vertex_list* vlist ) { // TODO: refactor to recusive search
+void insert_segment( line* l, face* parent, vertex_list* vlist, float s ) { // TODO: refactor to recusive search
 
     arc* search_head = l->head;
 
-    // vertex bpl = find_break_point( l, search_head->prev, search_head );
+    vertex bpl = find_break_point( search_head->prev, s );
 
     while ( search_head != NULL ) {
 
-        // vertex bpr = find_break_point( l, search_head, search_head->next );
+        vertex bpr = find_break_point( search_head, s );
 
         if ( bpl.x <= parent->site.x && parent->site.x < bpr.x ) {
             
@@ -141,9 +108,9 @@ void insert_segment( line* l, face* parent, vertex_list* vlist ) { // TODO: refa
 
             // recalulate vertex_events
 
-            recalculate_vertex_event( new_left, l , vlist );
-            recalculate_vertex_event( new_center, l , vlist );
-            recalculate_vertex_event( search_head, l , vlist );
+            recalculate_vertex_event( new_left, vlist, s );
+            recalculate_vertex_event( new_center, vlist, s );
+            recalculate_vertex_event( search_head, vlist, s );
 
             return;
         }
@@ -163,14 +130,12 @@ void pinch_out_segment( line* l, vertex_event* v_event ) { // TODO: refactor to 
 
         if ( search->pinch == v_event ) {
 
-            // vertex bp = find_break_point( l, search, search->next );
-
             // center arc
 
             edge* lead = search->next->reverse->next->twin;
 
             lead->next = search->reverse->next;
-            lead->next->origin = bp;
+            lead->next->origin = search->pinch->v_site;
 
             // center strike
 
@@ -183,7 +148,7 @@ void pinch_out_segment( line* l, vertex_event* v_event ) { // TODO: refactor to 
             // right arc
 
             edge* right_lead = lead->twin;
-            right_lead->origin = bp;
+            right_lead->origin = search->pinch->v_site;
 
             strike_right->next = right_lead;
             search->next->reverse->next = strike_right;
@@ -192,7 +157,7 @@ void pinch_out_segment( line* l, vertex_event* v_event ) { // TODO: refactor to 
 
             edge* left_lead = lead->next->twin;
             left_lead->next = strike_left;
-            strike_left->origin = bp;
+            strike_left->origin = search->pinch->v_site;
             strike_left->next = search->prev->reverse;
 
             // arc removal
@@ -224,8 +189,10 @@ arc* create_arc( face* parent ) {
     new_arc->pinch = NULL;
 
     new_arc->reverse = (edge*) malloc( sizeof(edge) );
-    new_arc->reverse->next = NULL;
+    new_arc->reverse->next = &(parent->top_edge);
     new_arc->reverse->twin = NULL;
+
+    parent->top_edge.next = new_arc->reverse;
 
     return new_arc;
 }
@@ -333,4 +300,83 @@ vertex solve_wall( arc* self, float s ) {
     fin.x = self->parent->site.x;
     fin.y = self->next->eval( self->next, s, fin.x );
     return fin;
+}
+
+line* create_line( vertex ll, vertex tr ) {
+
+    line* beach_line = (line*) malloc( sizeof(line) );
+
+    beach_line->bottom_left_corner = ll;
+    beach_line->top_right_corner = tr;
+
+    arc* head = NULL;
+
+    for ( int i = 0; i < 4; i++ ) {
+        beach_line->bounds[i] = (face*) malloc( sizeof(face) );
+        
+        arc* place = create_arc( beach_line->bounds[i] ); 
+
+        place->prev = head;
+        head = place;
+    }
+
+    arc* last = head;
+
+    while ( head->prev != NULL ) {
+        head->prev->next = head;
+        head = head->prev;
+    }
+
+    head->prev = last;
+    last->next = head;
+
+    beach_line->head = head;
+
+    // top
+    face* util = head->parent;
+
+    util->site.x = ll.x;
+    util->site.y = tr.y;
+
+    head->solve = &(solve_cap);
+    head->eval = &(eval_cap);
+    head->diff = &(diff_cap);
+
+    head = head->next;
+    
+    // right wall
+    util = head->parent;
+
+    util->site.x = tr.x;
+    util->site.y = tr.y;
+
+    head->solve = &(solve_wall);
+    head->eval = &(eval_wall);
+    head->diff = &(diff_wall);
+    
+    head = head->next;
+
+    // bottom
+    util = head->parent;
+
+    util->site.x = tr.x;
+    util->site.y = ll.y;
+
+    head->solve = &(solve_cap);
+    head->eval = &(eval_cap);
+    head->diff = &(diff_cap);
+    
+    head = head->next;
+
+    // left wall
+    util = head->parent;
+
+    util->site.x = ll.x;
+    util->site.y = ll.y;
+
+    head->solve = &(solve_wall);
+    head->eval = &(eval_wall);
+    head->diff = &(diff_wall);
+
+    return beach_line;
 }

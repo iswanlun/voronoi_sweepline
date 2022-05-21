@@ -34,7 +34,7 @@ line* create_line( vertex ll, vertex tr );
 
 void destroy_line( line* l );
 
-void insert_segment( line* l, face* parent, vertex_list* vlist );
+void insert_segment( line* l, face* parent, vertex_list* vlist, float s );
 
 void pinch_out_segment( line* l, vertex_event* v_event );
 
