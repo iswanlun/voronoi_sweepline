@@ -28,7 +28,7 @@ typedef struct _face_list {
     face* collection;
 
     int size;
-    int index
+    int index;
 
 } face_list;
 

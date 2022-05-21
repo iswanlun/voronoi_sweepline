@@ -43,21 +43,19 @@ vertex_event* merge_list( vertex_event* left, vertex_event* right ) {
 
 vertex_event* sort_vertex_list( vertex_event* head, int length ) {
 
-    if ( head->next = NULL ) {
+    if ( length <= 1 ) {
         return head;
 
     } else {
         vertex_event* left = head;
         int len = (length/2);
 
-        for (int i = 0; i < len; i++ ) {
+        for (int i = 1; i < len; i++ ) {
             head = head->next;
         }
 
-        vertex_event* last = head;
         vertex_event* right = head->next;
-
-        last->next = NULL;
+        head->next = NULL;
 
         left = sort_vertex_list(left, len);
         right = sort_vertex_list(right, length - len);
@@ -68,24 +66,25 @@ vertex_event* sort_vertex_list( vertex_event* head, int length ) {
 
 void insert_vertex_event( vertex_list* list, vertex_event** event, float v_x, float v_y, float sweep_y ) {
 
-    if ( *event == NULL ) {
-        *event = (vertex_event*) malloc( sizeof(vertex_event) );
+    if ( (*event) == NULL ) {
+        (*event) = (vertex_event*) malloc( sizeof(vertex_event) );
         (*event)->next = list->head;
         list->head = (*event);
-        list->head++;
+        list->length++;
     }
 
     (*event)->sweep_y = sweep_y;
     (*event)->v_site.x = v_x;
     (*event)->v_site.y = v_y;
     
-    sort_vertex_list( list->head, list->length );
+    list->head = sort_vertex_list( list->head, list->length );
 }
 
 vertex_event* next_vertex_event( vertex_list* list ) {
 
     vertex_event* tmp = list->head;
     list->head = list->head->next;
+    list->length--;
     return tmp;
 }
 
@@ -112,6 +111,8 @@ void null_vertex_event( vertex_list* list, vertex_event** dest ) {
 
         if (prev != NULL) {
             prev->next = index->next;
+        } else {
+            list->head = index->next;
         }
 
         free(index);

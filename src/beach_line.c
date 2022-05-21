@@ -11,7 +11,7 @@ vertex find_break_point( arc* left, float sweep_y ) {
     return left->solve( left, sweep_y );
 }
 
-inline float point_distance( vertex* p1, vertex* p2 ) {
+static inline float point_distance( vertex* p1, vertex* p2 ) {
 
     return sqrtf(powf((p2->x - p1->x), 2) + powf((p2->y - p2->y), 2));
 }
@@ -42,7 +42,7 @@ void recalculate_vertex_event( arc* local, vertex_list* vlist, float current_s )
     if ( local->next->parent == local->prev->parent || 
          (local->prev->parent->site.y >= local->parent->site.y && local->next->parent->site.y >= local->parent->site.y) ) {
         
-        null_vertex_event( vlist, local->pinch );
+        null_vertex_event( vlist, &(local->pinch) );
 
     } else {
 
