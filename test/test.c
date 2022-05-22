@@ -2,29 +2,40 @@
 #include "../src/beach_line.h"
 #include <stdio.h>
 
-#define VLIST_SIZE 5
-
 int test_face_creation( void ) {
+    
+    int list_size = 10;
 
-    vertex points[VLIST_SIZE];
+    vertex points[list_size];
 
-    points[0].x = 1;
+    points[0].x = 0;
     points[0].y = 2;
-    points[1].x = 3;
+    points[1].x = 0;
     points[1].y = 5;
-    points[2].x = 5;
+    points[2].x = 0;
     points[2].y = 1;
-    points[3].x = 7;
+    points[3].x = 0;
     points[3].y = 9;
-    points[4].x = 9;
+    points[4].x = 0;
     points[4].y = 11;
+    points[5].x = 0;
+    points[5].y = -3;
+    points[6].x = 0;
+    points[6].y = -32;
+    points[7].x = 0;
+    points[7].y = 16;
+    points[8].x = 0;
+    points[8].y = -2;
+    points[9].x = 0;
+    points[9].y = 2;
+    
 
-    face_list* list = create_face_list( points, VLIST_SIZE );
+    face_list* list = create_face_list( points, list_size );
 
     float prev = list->collection[0].site.y;
     int pass = 1;
 
-    for (int i = 0; i < VLIST_SIZE; i++ ) {
+    for (int i = 0; i < list_size; i++ ) {
 
         printf("  x: %f y: %f \n", list->collection[i].site.x, list->collection[i].site.y );
         pass &= (prev >= list->collection[i].site.y) ? 1 : 0;
