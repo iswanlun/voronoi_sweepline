@@ -377,9 +377,9 @@ line* create_line( vertex ll, vertex tr ) {
     return beach_line;
 }
 
-void destroy_line( line* l ) {
+void destroy_line( line* ln ) {
 
-    arc* index = l->head;
+    arc* index = ln->head;
 
     while( index != NULL ) {
         arc* next = index->next;
@@ -389,7 +389,7 @@ void destroy_line( line* l ) {
 
     for ( int i = 0; i < 4; i++ ) {
 
-        remove_face_edges( l->bounds[i] );
-        free( l->bounds[i] );
+        remove_face_edges( ln->bounds[i] );
+        free( ln->bounds[i] );
     }
 }

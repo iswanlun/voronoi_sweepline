@@ -132,17 +132,17 @@ int test_beach_line_creation( void ) {
     tr.x = 100;
     tr.y = 100;
 
-    line* l = create_line( ll, tr );
+    line* ln = create_line( ll, tr );
 
     printf("  Created bound faces sites:\n");
 
     for (int i = 0; i < 4; i++ ) {
 
-        printf("  Point %d: x: %f y: %f\n", (i+1), l->bounds[i]->site.x, l->bounds[i]->site.y );
+        printf("  Point %d: x: %f y: %f\n", (i+1), ln->bounds[i]->site.x, ln->bounds[i]->site.y );
 
     }
 
-    destroy_line( l );
+    destroy_line( ln );
 
     return pass;
 }
