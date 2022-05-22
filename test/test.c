@@ -42,6 +42,7 @@ int test_vertex_events( void ) {
     vertex_list* list = create_vertex_list();
 
     vertex_event* dud = NULL;
+    vertex_event* ext = NULL;
 
     insert_vertex_event( list, &(dud), 1, 0, -5);
     dud = NULL;
@@ -56,16 +57,45 @@ int test_vertex_events( void ) {
     insert_vertex_event( list, &(dud), 6, 0, 2);
     dud = NULL;
     insert_vertex_event( list, &(dud), 7, 0, -2);
+    dud = NULL;
+    insert_vertex_event( list, &(dud), 8, 0, 31);
+    dud = NULL;
+    insert_vertex_event( list, &(dud), 9, 0, 8);
+    dud = NULL;
 
-    int pass = 1;
+    insert_vertex_event( list, &(ext), 10, 0, -1);
+    insert_vertex_event( list, &(dud), 11, 0, 41);
 
-    pass &= (peek_vertex_event(list) == 34) ? 1 : 0;
-
-    printf("  Top value (34) -> %f \n", peek_vertex_event(list));
+    printf("  Top value (41) -> %f \n", peek_vertex_event(list));
 
     vertex_event* index = list->head;
 
+    int pass = 1;
     float prev = index->sweep_y;
+    while( index != NULL ) {
+
+        printf("  val: %f\n", index->sweep_y );
+
+        pass &= (index->sweep_y <= prev) ? 1 : 0;
+        prev = index->sweep_y;
+        index = index->next;
+    }
+
+    int count = list->length;
+
+    null_vertex_event( list, &(dud) );
+    null_vertex_event( list, &(ext) );
+
+    pass &= ( dud == NULL ) ? 1 : 0;
+    pass &= ( ext == NULL ) ? 1 : 0;
+
+    pass &= (count == (list->length + 2)) ? 1 : 0;
+
+    printf("  old count: %d new count: %d \n", count, list->length );
+    printf("  new list: \n");
+
+    index = list->head;
+    prev = index->sweep_y;
     while( index != NULL ) {
 
         printf("  val: %f\n", index->sweep_y );
