@@ -180,23 +180,6 @@ void pinch_out_segment( line* l, vertex_event* v_event ) { // TODO: refactor to 
     // note an error
 }
 
-arc* create_arc( face* parent ) {
-
-    arc* new_arc = (arc*) malloc( sizeof(arc) );
-    new_arc->parent = parent;
-    new_arc->next = NULL;
-    new_arc->prev = NULL;
-    new_arc->pinch = NULL;
-
-    new_arc->reverse = (edge*) malloc( sizeof(edge) );
-    new_arc->reverse->next = &(parent->top_edge);
-    new_arc->reverse->twin = NULL;
-
-    parent->top_edge.next = new_arc->reverse;
-
-    return new_arc;
-}
-
 float arc_rec( arc* self, float s, float x, float prev_diff, float delta_0, float delta_1 ) {
 
     if ( prev_diff > TOLERANCE ) {
@@ -300,6 +283,27 @@ vertex solve_wall( arc* self, float s ) {
     fin.x = self->parent->site.x;
     fin.y = self->next->eval( self->next, s, fin.x );
     return fin;
+}
+
+arc* create_arc( face* parent ) {
+
+    arc* new_arc = (arc*) malloc( sizeof(arc) );
+    new_arc->parent = parent;
+    new_arc->next = NULL;
+    new_arc->prev = NULL;
+    new_arc->pinch = NULL;
+
+    new_arc->reverse = (edge*) malloc( sizeof(edge) );
+    new_arc->reverse->next = &(parent->top_edge);
+    new_arc->reverse->twin = NULL;
+
+    parent->top_edge.next = new_arc->reverse;
+
+    new_arc->solve = &(solve_arc);
+    new_arc->eval = &(eval_arc);
+    new_arc->diff = &(diff_arc);
+
+    return new_arc;
 }
 
 line* create_line( vertex ll, vertex tr ) {
