@@ -23,7 +23,7 @@ face* merge_faces( face* left, int lsize, face* right, int rsize ) {
             arr[index++] = left[l++];
         }
 
-    } else  {
+    } else {
         while( r < rsize ) {
             arr[index++] = right[r++];
         }
@@ -37,6 +37,7 @@ face* sort_faces( face* list, int size ) {
 
     if ( size < 2 ) {
         return list;
+
     } else {
 
         int len = (size/2);

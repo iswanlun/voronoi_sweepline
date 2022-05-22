@@ -30,12 +30,11 @@ vertex_event* merge_list( vertex_event* left, vertex_event* right ) {
         }
     }
 
-    if ( left == NULL ) {
-        tail->next = right;
-    }
-
-    if ( right == NULL ) {
+    if ( left != NULL ) {
         tail->next = left;
+
+    } else {
+        tail->next = right;
     }
 
     return head;
@@ -43,7 +42,7 @@ vertex_event* merge_list( vertex_event* left, vertex_event* right ) {
 
 vertex_event* sort_vertex_list( vertex_event* head, int length ) {
 
-    if ( length <= 1 ) {
+    if ( length < 2 ) {
         return head;
 
     } else {
