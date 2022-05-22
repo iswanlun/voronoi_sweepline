@@ -1,7 +1,7 @@
 #include "test.h"
 #include <stdio.h>
 
-#define TEST_COUNT 3
+#define TEST_COUNT 4
 
 int main( void ) {
 
@@ -10,7 +10,8 @@ int main( void ) {
     tests[0] = &test_face_creation;
     tests[1] = &test_vertex_events;
     tests[2] = &test_beach_line_creation;
-
+    tests[3] = &test_site_event_insertion;
+ 
     for (int i = 0; i < TEST_COUNT; i++ ) {
 
         printf("Test %d:\n", (i+1));

@@ -1,6 +1,7 @@
 #include "test.h"
 #include "../src/beach_line.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 int test_face_creation( void ) {
     
@@ -29,7 +30,6 @@ int test_face_creation( void ) {
     points[9].x = 0;
     points[9].y = 2;
     
-
     face_list* list = create_face_list( points, list_size );
 
     float prev = list->collection[0].site.y;
@@ -127,8 +127,8 @@ int test_beach_line_creation( void ) {
     int pass = 1;
 
     vertex ll;
-    ll.x = 0;
-    ll.y = 0;
+    ll.x = -10;
+    ll.y = -10;
 
     vertex tr;
     tr.x = 100;
@@ -168,6 +168,32 @@ int test_beach_line_creation( void ) {
     }
 
     destroy_line( ln );
-
     return pass;
+}
+
+int test_site_event_insertion( void ) {
+
+    vertex ll;
+    ll.x = 0;
+    ll.y = 0;
+
+    vertex tr;
+    tr.x = 100;
+    tr.y = 100;
+
+    line* ln = create_line( ll, tr );
+    vertex_list* vlist = create_vertex_list();
+
+    face* test_face = (face*) malloc( sizeof(face) );
+
+    test_face->site.x = 40;
+    test_face->site.y = 60;
+
+    insert_segment( ln, test_face, vlist, 60 );
+
+    free( test_face );
+    destroy_line( ln );
+    dispose_vertex_list( vlist );
+
+    return 1;
 }

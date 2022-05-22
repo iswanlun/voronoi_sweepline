@@ -4,5 +4,6 @@
 int test_face_creation( void );
 int test_vertex_events( void );
 int test_beach_line_creation( void );
+int test_site_event_insertion( void );
 
 #endif

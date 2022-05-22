@@ -84,6 +84,10 @@ void insert_segment( line* l, face* parent, vertex_list* vlist, float s ) { // T
             new_center->next = search_head;
             search_head->prev = new_center;
 
+            new_left->solve = search_head->solve; // correct function pointers
+            new_left->eval = search_head->eval;
+            new_left->diff = search_head->diff;
+
             // split the edge
 
             edge* left_rev = new_left->reverse;
@@ -257,7 +261,7 @@ float eval_arc( arc* self, float s, float x ) {
 
 float diff_arc( arc* self, float x, float s, float y ) {
 
-    return eval_arc( self, x, s ) - y;
+    return eval_arc( self, s, x ) - y;
 }
 
 vertex solve_arc( arc* self, float s ) {
