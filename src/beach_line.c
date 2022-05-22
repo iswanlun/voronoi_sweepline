@@ -379,13 +379,16 @@ line* create_line( vertex ll, vertex tr ) {
 
 void destroy_line( line* ln ) {
 
-    arc* index = ln->head;
+    arc* first = ln->head;
+    arc* index = ln->head->next;
 
-    while( index != NULL ) {
+    while( index != NULL && index != first ) {
         arc* next = index->next;
         free(index);
         index = next;
     }
+
+    free(first);
 
     for ( int i = 0; i < 4; i++ ) {
 
