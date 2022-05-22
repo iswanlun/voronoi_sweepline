@@ -119,3 +119,30 @@ int test_vertex_events( void ) {
     dispose_vertex_list( list );
     return pass;
 }
+
+int test_beach_line_creation( void ) {
+
+    int pass = 1;
+
+    vertex ll;
+    ll.x = 0;
+    ll.y = 0;
+
+    vertex tr;
+    tr.x = 100;
+    tr.y = 100;
+
+    line* l = create_line( ll, tr );
+
+    printf("  Created bound faces sites:\n");
+
+    for (int i = 0; i < 4; i++ ) {
+
+        printf("  Point %d: x: %f y: %f\n", (i+1), l->bounds[i]->site.x, l->bounds[i]->site.y );
+
+    }
+
+    destroy_line( l );
+
+    return pass;
+}

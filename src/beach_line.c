@@ -4,7 +4,7 @@
 
 #define DIR(v1, v2) (((v2.x > v1.x) ? 0xF0 : 0x0) & ((v2.y > v2.x) ? 0xF : 0x0))
 
-#define TOLERANCE 0.01
+#define TOLERANCE 0.5
 
 vertex find_break_point( arc* left, float sweep_y ) {
 
@@ -305,15 +305,11 @@ vertex solve_wall( arc* self, float s ) {
 line* create_line( vertex ll, vertex tr ) {
 
     line* beach_line = (line*) malloc( sizeof(line) );
-
-    beach_line->bottom_left_corner = ll;
-    beach_line->top_right_corner = tr;
-
     arc* head = NULL;
 
     for ( int i = 0; i < 4; i++ ) {
+
         beach_line->bounds[i] = (face*) malloc( sizeof(face) );
-        
         arc* place = create_arc( beach_line->bounds[i] ); 
 
         place->prev = head;
@@ -393,10 +389,7 @@ void destroy_line( line* l ) {
 
     for ( int i = 0; i < 4; i++ ) {
 
-        
-
+        remove_face_edges( l->bounds[i] );
+        free( l->bounds[i] );
     }
-
-
-
 }

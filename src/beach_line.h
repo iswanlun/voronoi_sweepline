@@ -23,9 +23,6 @@ typedef struct _line {
 
     arc* head;
 
-    vertex bottom_left_corner;
-    vertex top_right_corner;
-
     face* bounds[4];
 
 } line;
@@ -39,7 +36,5 @@ void insert_segment( line* l, face* parent, vertex_list* vlist, float s );
 void pinch_out_segment( line* l, vertex_event* v_event );
 
 arc* create_arc( face* parent );
-
-void destroy_arc( arc* a );
 
 #endif
