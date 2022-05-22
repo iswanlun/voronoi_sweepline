@@ -35,9 +35,11 @@ int test_face_creation( void ) {
     float prev = list->collection[0].site.y;
     int pass = 1;
 
+    printf("  Face list:\n");
+
     for (int i = 0; i < list_size; i++ ) {
 
-        printf("  x: %f y: %f \n", list->collection[i].site.x, list->collection[i].site.y );
+        printf("    x: %f y: %f \n", list->collection[i].site.x, list->collection[i].site.y );
         pass &= (prev >= list->collection[i].site.y) ? 1 : 0;
         prev = list->collection[i].site.y;
     }
@@ -85,7 +87,7 @@ int test_vertex_events( void ) {
     float prev = index->sweep_y;
     while( index != NULL ) {
 
-        printf("  val: %f\n", index->sweep_y );
+        printf("    val: %f\n", index->sweep_y );
 
         pass &= (index->sweep_y <= prev) ? 1 : 0;
         prev = index->sweep_y;
@@ -109,7 +111,7 @@ int test_vertex_events( void ) {
     prev = index->sweep_y;
     while( index != NULL ) {
 
-        printf("  val: %f\n", index->sweep_y );
+        printf("    val: %f\n", index->sweep_y );
 
         pass &= (index->sweep_y <= prev) ? 1 : 0;
         prev = index->sweep_y;
@@ -138,8 +140,31 @@ int test_beach_line_creation( void ) {
 
     for (int i = 0; i < 4; i++ ) {
 
-        printf("  Point %d: x: %f y: %f\n", (i+1), ln->bounds[i]->site.x, ln->bounds[i]->site.y );
+        printf("    Bounding face %d vertex: x: %f y: %f\n", (i+1), ln->bounds[i]->site.x, ln->bounds[i]->site.y );
+    }
 
+    vertex corners_list[4]; 
+    
+    arc* index = ln->head;
+    corners_list[0] = index->solve( index, 50 );
+    pass &= ( corners_list[0].x == tr.x && corners_list[0].y == tr.y ) ? 1 : 0;
+
+    index = index->next;
+    corners_list[1] = index->solve( index, 50 );
+    pass &= ( corners_list[1].x == tr.x && corners_list[1].y == ll.y ) ? 1 : 0;
+    
+    index = index->next;
+    corners_list[2] = index->solve( index, 50 );
+    pass &= ( corners_list[2].x == ll.x && corners_list[2].y == ll.y ) ? 1 : 0;
+    
+    index = index->next;
+    corners_list[3] = index->solve( index, 50 );
+    pass &= ( corners_list[3].x == ll.x && corners_list[3].y == tr.y ) ? 1 : 0;
+
+    printf("  Corners list:\n");
+    for ( int i = 0; i < 4; i++ ) {
+        
+        printf("    x: %f y: %f \n", corners_list[i].x, corners_list[i].y );
     }
 
     destroy_line( ln );
