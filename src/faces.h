@@ -40,4 +40,6 @@ face* pop_next_face( face_list* list );
 
 void destroy_face_list( face_list* list );
 
+void remove_face_edges( face* f );
+
 #endif

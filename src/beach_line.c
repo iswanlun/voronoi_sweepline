@@ -380,3 +380,23 @@ line* create_line( vertex ll, vertex tr ) {
 
     return beach_line;
 }
+
+void destroy_line( line* l ) {
+
+    arc* index = l->head;
+
+    while( index != NULL ) {
+        arc* next = index->next;
+        free(index);
+        index = next;
+    }
+
+    for ( int i = 0; i < 4; i++ ) {
+
+        
+
+    }
+
+
+
+}

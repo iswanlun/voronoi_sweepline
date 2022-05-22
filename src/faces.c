@@ -59,6 +59,7 @@ face_list* create_face_list( vertex* sites, int size ) {
 
     for ( int i = 0; i < size; i++ ) {
         fin->collection[i].site = sites[i];
+        fin->collection[i].top_edge.next = NULL;
     }
 
     fin->collection = sort_faces( fin->collection, size );
@@ -89,6 +90,21 @@ face* pop_next_face( face_list* list ) {
 
 void destroy_face_list( face_list* list ) {
 
+    for ( int i = 0; i < list->size; i++ ) {
+        remove_face_edges( &(list->collection[i]) );
+    }
+
     free(list->collection);
     free(list);
+}
+
+void remove_face_edges( face* f ) {
+
+    edge* index = f->top_edge.next;
+
+    while ( index != NULL && index != &(f->top_edge) ) {
+        edge* next = index->next;
+        free(index);
+        index = next;
+    }
 }

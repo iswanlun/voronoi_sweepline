@@ -40,4 +40,6 @@ void pinch_out_segment( line* l, vertex_event* v_event );
 
 arc* create_arc( face* parent );
 
+void destroy_arc( arc* a );
+
 #endif
