@@ -130,3 +130,14 @@ vertex_list* create_vertex_list( void ) {
 
     return list;
 }
+
+void dispose_vertex_list( vertex_list* list ) {
+
+    while( list->head != NULL ) {
+        vertex_event* tmp = list->head->next;
+        free(list->head);
+        list->head = tmp;
+    }
+
+    free(list);
+}

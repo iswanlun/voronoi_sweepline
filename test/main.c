@@ -1,13 +1,14 @@
 #include "test.h"
 #include <stdio.h>
 
-#define TEST_COUNT 1
+#define TEST_COUNT 2
 
 int main( void ) {
 
     int (*tests[TEST_COUNT])(void);
 
     tests[0] = &test_face_creation;
+    tests[1] = &test_vertex_events;
 
     for (int i = 0; i < TEST_COUNT; i++ ) {
 

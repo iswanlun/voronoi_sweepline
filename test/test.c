@@ -35,3 +35,46 @@ int test_face_creation( void ) {
 
     return pass;
 }
+
+
+int test_vertex_events( void ) {
+
+    vertex_list* list = create_vertex_list();
+
+    vertex_event* dud = NULL;
+
+    insert_vertex_event( list, &(dud), 1, 0, -5);
+    dud = NULL;
+    insert_vertex_event( list, &(dud), 2, 0, 5);
+    dud = NULL;
+    insert_vertex_event( list, &(dud), 3, 0, 7);
+    dud = NULL;
+    insert_vertex_event( list, &(dud), 4, 0, 12);
+    dud = NULL;
+    insert_vertex_event( list, &(dud), 5, 0, 34);
+    dud = NULL;
+    insert_vertex_event( list, &(dud), 6, 0, 2);
+    dud = NULL;
+    insert_vertex_event( list, &(dud), 7, 0, -2);
+
+    int pass = 1;
+
+    pass &= (peek_vertex_event(list) == 34) ? 1 : 0;
+
+    printf("  Top value (34) -> %f \n", peek_vertex_event(list));
+
+    vertex_event* index = list->head;
+
+    float prev = index->sweep_y;
+    while( index != NULL ) {
+
+        printf("  val: %f\n", index->sweep_y );
+
+        pass &= (index->sweep_y <= prev) ? 1 : 0;
+        prev = index->sweep_y;
+        index = index->next;
+    }
+
+    dispose_vertex_list( list );
+    return pass;
+}
