@@ -184,14 +184,22 @@ int test_site_event_insertion( void ) {
     line* ln = create_line( ll, tr );
     vertex_list* vlist = create_vertex_list();
 
-    face* test_face = (face*) malloc( sizeof(face) );
+    face* test_face[4];
 
-    test_face->site.x = 40;
-    test_face->site.y = 60;
+    for ( int i = 0; i < 4; i++ ) {
 
-    insert_segment( ln, test_face, vlist, 60 );
+        test_face[i] = (face*) malloc( sizeof(face) );
 
-    free( test_face );
+        test_face[i]->site.x = 10 + (i * 10);
+        test_face[i]->site.y = 80 - (i * 5);;
+
+        insert_segment( ln, test_face[i], vlist, test_face[i]->site.y );
+    }
+    
+    for ( int i = 0; i < 4; i++ ) {
+        free( test_face[i] );
+    }
+
     destroy_line( ln );
     dispose_vertex_list( vlist );
 

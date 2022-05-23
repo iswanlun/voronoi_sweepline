@@ -4,7 +4,13 @@
 
 #include <stdio.h>  // TODO remove
 
-#define DIR(v1, v2) (((v2.y > v1.y) || ((v2.y == v1.y) && (v2.x > v1.x))) ? 1 : 0)
+#define DIR(v1, v2) ((v2.x > v1.x || ((v2.x == v1.x) && (v2.y < v1.y))) ? 0xF0 : 0x0) \
+                    | \
+                    ((v2.y > v1.y || ((v2.y == v1.y) && (v2.x > v1.x))) ? 0x0F : 0x0)
+
+
+
+#define REVERSE(d1, d2) (((d1 & 0xF0) != (d2 & 0xF0)) && ((d1 & 0xF) != (d2 & 0xF)))
 #define SIGN(f) (((unsigned int)f) >> 31)
 
 #define TOLERANCE 0.5
@@ -44,7 +50,7 @@ void recalculate_vertex_event( arc* local, vertex_list* vlist, float current_s )
 
             temp = DIR(v1, v2);
 
-            if ( temp != orient ) {
+            if ( REVERSE(temp, orient) ) {
                 delta_0 = 0;
                 delta_1 = ( delta_1 / -2 );
             } else {
@@ -188,38 +194,6 @@ void pinch_out_segment( line* l, vertex_event* v_event ) { // TODO: refactor to 
     // note an error
 }
 
-// float arc_rec( arc* self, float s, float x, float prev_diff, float delta_0, float delta_1 ) {
-
-//     if ( prev_diff > TOLERANCE ) {
-
-//         float this_x = x + delta_1;
-//         float self_y = self->eval( self, s, this_x );
-//         float this_diff = self->next->diff( self->next, this_x, s, self_y );
-
-//         if ( this_diff < TOLERANCE ) {
-//             return arc_rec( self, s, this_x, this_diff, 0, (delta_1 / 2) );
-//         } else {
-//             return arc_rec( self, s, this_x, this_diff, delta_1, delta_0 + delta_1 );
-//         }
-
-//     } else if ( prev_diff < -TOLERANCE ) {
-
-//         float this_x = x - delta_1;
-//         float self_y = self->eval( self, s, this_x );
-//         float this_diff = self->next->diff( self->next, this_x, s, self_y );
-
-//         if ( this_diff > -TOLERANCE ) {
-//             return arc_rec( self, s, this_x, this_diff, 0, (delta_1 / 2) );
-//         } else {
-//             return arc_rec( self, s, this_x, this_diff, delta_1, delta_0 + delta_1 );
-//         }
-
-//     } else {
-//         return x;
-//     }
-// }
-
-
 float arc_resolve( arc* self, float s, float x ) {
     
     float y = self->eval(self, s, x);
@@ -229,8 +203,6 @@ float arc_resolve( arc* self, float s, float x ) {
     float temp;
 
     while ( (diff > TOLERANCE) || (diff < -TOLERANCE) ) {
-
-        printf("    DIFF: %f \n", diff);
 
         if ( diff > 0) {
 
