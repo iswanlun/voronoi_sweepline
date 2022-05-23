@@ -2,7 +2,10 @@
 #include <math.h>
 #include "beach_line.h"
 
-#define DIR(v1, v2) (((v2.x > v1.x) ? 0xF0 : 0x0) & ((v2.y > v2.x) ? 0xF : 0x0))
+#include <stdio.h>  // TODO remove
+
+#define DIR(v1, v2) (((v2.y > v1.y) || ((v2.y == v1.y) && (v2.x > v1.x))) ? 1 : 0)
+#define SIGN(f) (((unsigned int)f) >> 31)
 
 #define TOLERANCE 0.5
 
@@ -14,27 +17,6 @@ vertex find_break_point( arc* left, float sweep_y ) {
 static inline float point_distance( vertex* p1, vertex* p2 ) {
 
     return sqrtf(powf((p2->x - p1->x), 2) + powf((p2->y - p2->y), 2));
-}
-
-float vertex_event_to( arc* local, char prev_direction, float prev_s, float delta_0, float delta_1 ) {
-
-    vertex v1 = find_break_point(local->prev, prev_s + delta_1);
-    vertex v2 = find_break_point(local, prev_s + delta_1);
-
-    if (point_distance(&v1, &v2) < TOLERANCE) {
-        return prev_s + delta_1;
-
-    } else {
-
-        char new_direction = DIR(v1, v2);
-
-        if (new_direction != prev_direction) { // reversal
-            return vertex_event_to( local, new_direction, prev_s + delta_1, 0, (delta_1 / -2) );
-
-        } else {
-            return vertex_event_to( local, new_direction, prev_s + delta_1, delta_1, delta_0 + delta_1 );
-        }
-    }
 }
 
 void recalculate_vertex_event( arc* local, vertex_list* vlist, float current_s ) {
@@ -49,11 +31,33 @@ void recalculate_vertex_event( arc* local, vertex_list* vlist, float current_s )
         vertex v1 = find_break_point(local->prev, current_s);
         vertex v2 = find_break_point(local, current_s);
 
-        float adjusted_s = vertex_event_to( local, DIR(v1, v2), current_s, 0, -1 );
+        int orient = DIR(v1, v2);
+        int temp;
+        float delta_0 = 0, delta_1 = -1;
 
-        vertex v3 = find_break_point( local, adjusted_s );
+        float s = current_s;
+
+        while ( point_distance( &v1, &v2 ) > TOLERANCE ) {
+
+            v1 = find_break_point(local->prev, s);
+            v2 = find_break_point(local, s);
+
+            temp = DIR(v1, v2);
+
+            if ( temp != orient ) {
+                delta_0 = 0;
+                delta_1 = ( delta_1 / -2 );
+            } else {
+                float next = delta_0 + delta_1;
+                delta_0 = delta_1;
+                delta_1 = next;
+            }
+
+            s += delta_1;
+            orient = temp;
+        }
     
-        insert_vertex_event( vlist, &(local->pinch), v3.x, v3.y, adjusted_s );
+        insert_vertex_event( vlist, &(local->pinch), v1.x, v1.y, s );
     }
 }
 
@@ -184,35 +188,76 @@ void pinch_out_segment( line* l, vertex_event* v_event ) { // TODO: refactor to 
     // note an error
 }
 
-float arc_rec( arc* self, float s, float x, float prev_diff, float delta_0, float delta_1 ) {
+// float arc_rec( arc* self, float s, float x, float prev_diff, float delta_0, float delta_1 ) {
 
-    if ( prev_diff > TOLERANCE ) {
+//     if ( prev_diff > TOLERANCE ) {
 
-        float this_x = x + delta_1;
-        float self_y = self->eval( self, s, this_x );
-        float this_diff = self->next->diff( self->next, this_x, s, self_y );
+//         float this_x = x + delta_1;
+//         float self_y = self->eval( self, s, this_x );
+//         float this_diff = self->next->diff( self->next, this_x, s, self_y );
 
-        if ( this_diff < 0 ) {
-            return arc_rec( self, s, this_x, this_diff, 0, (delta_1 / 2) );
-        } else {
-            return arc_rec( self, s, this_x, this_diff, delta_1, delta_0 + delta_1 );
+//         if ( this_diff < TOLERANCE ) {
+//             return arc_rec( self, s, this_x, this_diff, 0, (delta_1 / 2) );
+//         } else {
+//             return arc_rec( self, s, this_x, this_diff, delta_1, delta_0 + delta_1 );
+//         }
+
+//     } else if ( prev_diff < -TOLERANCE ) {
+
+//         float this_x = x - delta_1;
+//         float self_y = self->eval( self, s, this_x );
+//         float this_diff = self->next->diff( self->next, this_x, s, self_y );
+
+//         if ( this_diff > -TOLERANCE ) {
+//             return arc_rec( self, s, this_x, this_diff, 0, (delta_1 / 2) );
+//         } else {
+//             return arc_rec( self, s, this_x, this_diff, delta_1, delta_0 + delta_1 );
+//         }
+
+//     } else {
+//         return x;
+//     }
+// }
+
+
+float arc_resolve( arc* self, float s, float x ) {
+    
+    float y = self->eval(self, s, x);
+    float diff = self->next->diff( self->next, x, s, y );
+
+    float delta_0 = 0, delta_1 = 1;
+    float temp;
+
+    while ( (diff > TOLERANCE) || (diff < -TOLERANCE) ) {
+
+        printf("    DIFF: %f \n", diff);
+
+        if ( diff > 0) {
+
+            x += delta_1;
+            y = self->eval( self, s, x );
+            temp = self->next->diff( self->next, x, s, y );
+
+        } else if ( diff < 0 ) {
+
+            x -= delta_1;
+            y = self->eval( self, s, x );
+            temp = self->next->diff( self->next, x, s, y );
         }
 
-    } else if ( prev_diff < -TOLERANCE ) {
-
-        float this_x = x - delta_1;
-        float self_y = self->eval( self, s, this_x );
-        float this_diff = self->next->diff( self->next, this_x, s, self_y );
-
-        if ( this_diff > 0 ) {
-            return arc_rec( self, s, this_x, this_diff, 0, (delta_1 / 2) );
+        if (SIGN(temp) != SIGN(diff)) {
+            delta_0 = 0;
+            delta_1 = (delta_1/2);
         } else {
-            return arc_rec( self, s, this_x, this_diff, delta_1, delta_0 + delta_1 );
+            float next = delta_0 + delta_1;
+            delta_0 = delta_1;
+            delta_1 = next;
         }
 
-    } else {
-        return x;
+        diff = temp;
     }
+
+    return x;
 }
 
 float eval_cap( arc* self, float s, float x ) {
@@ -230,7 +275,7 @@ vertex solve_cap( arc* self, float s ) {
     vertex fin;
     float x = self->next->parent->site.x;
     fin.y = self->parent->site.y;
-    fin.x = arc_rec( self, s, x, self->next->diff(self->next, x, s, fin.y), 0, 1 );
+    fin.x = arc_resolve( self, s, x );
     
     return fin;
 }
@@ -261,12 +306,30 @@ float eval_arc( arc* self, float s, float x ) {
 
 float diff_arc( arc* self, float x, float s, float y ) {
 
+    if ( self->parent->site.y == s ) {
+
+        if ( x < (self->parent->site.x - TOLERANCE) ) {
+            return 1;
+        } else if ( x > (self->parent->site.x + TOLERANCE) ) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
     return eval_arc( self, s, x ) - y;
 }
 
 vertex solve_arc( arc* self, float s ) {
 
     vertex fin;
+
+    if ( self->parent->site.y == s ) {
+        fin.x = self->parent->site.x;
+        fin.y = self->next->eval( self->next, s, fin.x );
+        return fin;
+    }
+
     float x;
     if ( self->parent->site.y < self->next->parent->site.y ) {
         x = self->parent->site.x;
@@ -275,7 +338,7 @@ vertex solve_arc( arc* self, float s ) {
     }
 
     fin.y = self->eval( self, s, x );
-    fin.x = arc_rec( self, s, x, self->next->diff(self->next, x, s, fin.y), 0, 1 );
+    fin.x = arc_resolve( self, s, x );
     fin.y = self->eval( self, s, fin.x );
 
     return fin;
