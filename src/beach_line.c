@@ -3,14 +3,6 @@
 #include <limits.h>
 #include "beach_line.h"
 
-#include <stdio.h>  // TODO remove
-
-// TODO assess
-// static inline float point_distance( vertex* p1, vertex* p2 ) {
-
-//     return sqrtf(powf((p2->x - p1->x), 2) + powf((p2->y - p2->y), 2));
-// }
-
 /* Returns the s value that causes a break point for this arc */
 float circumcenter( arc* local, float s ) {
 
@@ -46,7 +38,7 @@ void recalculate_vertex_event( arc* local, vertex_list* vlist, float s ) {
 
     if ( local->next == NULL ||
          local->prev == NULL || 
-         (local->prev->parent->site.y >= local->parent->site.y && 
+        (local->prev->parent->site.y >= local->parent->site.y && 
          local->next->parent->site.y >= local->parent->site.y) ) {
         
         null_vertex_event( vlist, &(local->pinch) );
@@ -146,7 +138,7 @@ void site_event( line* ln, face* parent, vertex_list* vlist ) {
 
     } else if ( parent->site.x > bpr.x ) {
         
-        search = search_right( search->prev, parent->site.x, s );
+        search = search_right( search->next, parent->site.x, s );
         insert_face( search, parent, vlist );
         ln->head = ln->head->next;
 
