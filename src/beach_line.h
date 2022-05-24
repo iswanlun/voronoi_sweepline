@@ -13,27 +13,21 @@ typedef struct _arc {
 
     vertex_event* pinch;
 
-    vertex (*solve) (struct _arc*, float);              // self, s
-    float (*eval) (struct _arc*, float, float );        // self, s, x
-    float (*diff) (struct _arc*, float, float, float);  // self, x, s, y
-
 } arc;
 
 typedef struct _line {
 
     arc* head;
 
-    face* bounds[4];
-
 } line;
 
-line* create_line( vertex ll, vertex tr );
+line* create_line( void );
 
 void destroy_line( line* l );
 
-void insert_segment( line* l, face* parent, vertex_list* vlist, float s );
+void site_event( line* l, face* parent, vertex_list* vlist );
 
-void pinch_out_segment( line* l, vertex_event* v_event );
+void circle_event( line* l, vertex_event* v_event );
 
 arc* create_arc( face* parent );
 

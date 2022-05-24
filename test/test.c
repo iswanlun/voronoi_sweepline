@@ -124,51 +124,7 @@ int test_vertex_events( void ) {
 
 int test_beach_line_creation( void ) {
 
-    int pass = 1;
-
-    vertex ll;
-    ll.x = -10;
-    ll.y = -10;
-
-    vertex tr;
-    tr.x = 100;
-    tr.y = 100;
-
-    line* ln = create_line( ll, tr );
-
-    printf("  Created bound faces sites:\n");
-
-    for (int i = 0; i < 4; i++ ) {
-
-        printf("    Bounding face %d vertex: x: %f y: %f\n", (i+1), ln->bounds[i]->site.x, ln->bounds[i]->site.y );
-    }
-
-    vertex corners_list[4]; 
-    
-    arc* index = ln->head;
-    corners_list[0] = index->solve( index, 50 );
-    pass &= ( corners_list[0].x == tr.x && corners_list[0].y == tr.y ) ? 1 : 0;
-
-    index = index->next;
-    corners_list[1] = index->solve( index, 50 );
-    pass &= ( corners_list[1].x == tr.x && corners_list[1].y == ll.y ) ? 1 : 0;
-    
-    index = index->next;
-    corners_list[2] = index->solve( index, 50 );
-    pass &= ( corners_list[2].x == ll.x && corners_list[2].y == ll.y ) ? 1 : 0;
-    
-    index = index->next;
-    corners_list[3] = index->solve( index, 50 );
-    pass &= ( corners_list[3].x == ll.x && corners_list[3].y == tr.y ) ? 1 : 0;
-
-    printf("  Corners list:\n");
-    for ( int i = 0; i < 4; i++ ) {
-        
-        printf("    x: %f y: %f \n", corners_list[i].x, corners_list[i].y );
-    }
-
-    destroy_line( ln );
-    return pass;
+    return 1;
 }
 
 int test_site_event_insertion( void ) {
@@ -193,7 +149,7 @@ int test_site_event_insertion( void ) {
         test_face[i]->site.x = 10 + (i * 10);
         test_face[i]->site.y = 80 - (i * 5);;
 
-        insert_segment( ln, test_face[i], vlist, test_face[i]->site.y );
+        site_event( ln, test_face[i], vlist );
     }
     
     for ( int i = 0; i < 4; i++ ) {
