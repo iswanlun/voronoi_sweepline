@@ -3,11 +3,59 @@
 #include <limits.h>
 #include "beach_line.h"
 
-/* Returns the s value that causes a break point for this arc */
-float circumcenter( arc* local, float s ) {
+#define MIN(x, y) ((x < y) ? x : y)
+#define MAX(x, y) ((x > y) ? x : y)
 
-    return 1;
-    // math from tool
+vertex form( vertex p1, vertex p2 ) {
+
+    vertex fin;
+    fin.x = ( -1 * (p2.x - p1.x)) / (p2.y - p1.y);
+    fin.y = ((p2.y + p1.y) / 2) - (fin.x * ((p2.x + p1.x) / 2));
+    return fin;
+}
+
+float distance( vertex v1, vertex v2 ) {
+
+    return sqrtf(powf((v2.x - v1.x), 2) + powf((v2.y - v1.y), 2));
+}
+
+/* Returns the s value that causes a break point for this arc */
+vertex circumcenter( arc* local ) {
+
+    vertex v1 = local->prev->parent->site;
+    vertex v2 = local->parent->site;
+    vertex v3 = local->next->parent->site;
+
+    vertex fin;
+
+    if ( v1.y == v2.y ) {
+
+        fin.x = (v1.x + v2.x) / 2;
+        vertex mb = form( v2, v3 );
+        fin.y = (mb.x * fin.x) + mb.y;
+
+    } else if ( v2.y == v3.y ) {
+
+        fin.x = (v2.x + v3.x) / 2;
+        vertex mb = form( v1, v2 );
+        fin.y = (mb.x * fin.x) + mb.y;
+
+    } else {
+
+        vertex mb1 = form( v1, v2 );
+        vertex mb2 = form( v2, v3 );
+
+        fin.x = ( mb2.y - mb1.y ) / ( mb1.x - mb2.x );
+        fin.y = (mb1.x * fin.x) + mb1.y;
+    }
+
+    return fin;
+}
+
+
+static inline float quad_x( float f, float h, float p, float k, float m, float b ) {
+
+    return (f * sqrtf(p) * sqrt( b + ( h * m ) - k + ( m * m * p ) )) + h + (2 * m * p);
 }
 
 /* Returns the value of the bp to the right */
@@ -27,8 +75,34 @@ vertex break_point( arc* left, arc* right, float s ) {
 
     } else {
 
-        // math from tool
+        vertex vleft = left->parent->site;
+        vertex vright = right->parent->site;
 
+        float h = vleft.x;
+        float p = ( ( vleft.y - s ) / 2 );
+        float k = ( vleft.y - p );
+
+        if ( vleft.y == vright.y ) {
+            fin.x = (vright.x + vleft.x) / 2 ;
+            fin.y = k + ( powf((fin.x - h), 2) / ( 4 * p ) );           
+
+        } else {
+            float m = (-1) * ((vright.x - vleft.x) / ( vright.y - vleft.y ));
+            float b = (((pow(vright.x, 2) - pow(vleft.x, 2)) + (pow(vright.y, 2) - pow(vleft.y, 2))) / (2 * (vright.y - vleft.y)));
+
+            float x1 = quad_x(  2.0, h, p, k, m, b );
+            float x2 = quad_x( -2.0, h, p, k, m, b );
+            float x;
+
+            if ( vleft.y < vright.y ) {
+                x = MAX(x1, x2);
+            } else {
+                x = MIN(x1, x2);
+            }
+
+            fin.x = x;
+            fin.y = ((m * x) + b);
+        }
     }
 
     return fin;
@@ -45,9 +119,9 @@ void recalculate_vertex_event( arc* local, vertex_list* vlist, float s ) {
 
     } else {
 
-        float v_event_s = circumcenter( local, s );
-        vertex v = break_point( local, local->next, v_event_s );
-        insert_vertex_event( vlist, &(local->pinch), v.x, v.y, v_event_s );
+        vertex v = circumcenter( local );
+        float event_s = v.y - distance( v, local->parent->site );
+        insert_vertex_event( vlist, &(local->pinch), v.x, v.y, event_s );
     }
 }
 

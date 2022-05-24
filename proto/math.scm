@@ -36,6 +36,24 @@
                     (sin (* 2 A)) 
                     (sin (* 2 B))
                     (sin (* 2 C)))))))
+(define (form p1 p2) 
+    (let* ((m
+                (/
+                    (* -1 (- (x-point p2) (x-point p1)))
+                    (- (y-point p2) (y-point p1))))
+            (b
+                (-
+                    (/ (+ (y-point p2) (y-point p1)) 2)
+                    (* m (/ (+ (x-point p2) (x-point p1)) 2)))))
+        (list m b)))
+
+(define (cir-simple p1 p2 p3)
+    (let* ( (f1 (form p1 p2)) 
+            (f2 (form p2 p3))
+            (x (/ 
+                    (- (car (cdr f2)) (car (cdr f1)))
+                    (- (car f1) (car f2)))))
+        (list x (+ (* (car f1) x) (car (cdr f1))))))
 
 (define (square n)
     (* n n))

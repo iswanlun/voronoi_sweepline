@@ -129,15 +129,7 @@ int test_beach_line_creation( void ) {
 
 int test_site_event_insertion( void ) {
 
-    vertex ll;
-    ll.x = 0;
-    ll.y = 0;
-
-    vertex tr;
-    tr.x = 100;
-    tr.y = 100;
-
-    line* ln = create_line( ll, tr );
+    line* ln = create_line();
     vertex_list* vlist = create_vertex_list();
 
     face* test_face[4];
