@@ -1,6 +1,7 @@
 #include "faces.h"
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 face* merge_faces( face* left, int lsize, face* right, int rsize ) {
 
@@ -60,6 +61,7 @@ face_list* create_face_list( vertex* sites, int size ) {
     for ( int i = 0; i < size; i++ ) {
         fin->collection[i].site = sites[i];
         fin->collection[i].top_edge.next = NULL;
+        fin->collection[i].top_edge.home = &(fin->collection[i]);
     }
 
     fin->collection = sort_faces( fin->collection, size );
@@ -107,4 +109,18 @@ void remove_face_edges( face* f ) {
         free(index);
         index = next;
     }
+}
+
+edge* create_edge( face* parent ) {
+
+    edge* fin = (edge*) malloc( sizeof(edge) );
+
+    fin->next = NULL;
+    fin->twin = NULL;
+    fin->home = parent;
+    
+    fin->origin.x = INT_MIN;
+    fin->origin.y = INT_MIN;
+
+    return fin;
 }

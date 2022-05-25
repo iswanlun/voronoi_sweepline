@@ -8,6 +8,14 @@ void bound_faces( face_list* list, vertex ll, vertex tr ) {
 
     // restrict vertices to bounds
 
+    // find out line
+
+    // find in line
+
+    // remove eveything in between
+
+    // start at twin of in line
+
 }
 
 

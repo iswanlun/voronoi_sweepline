@@ -1,29 +1,33 @@
 #ifndef FACES_H
 #define FACES_H
 
-typedef struct _vertex {
+typedef struct vertex {
 
     float x, y;
 
 } vertex;
 
-typedef struct _edge {
+struct face;
+
+typedef struct edge {
 
     vertex origin; // clockwise
 
-    struct _edge* next;
-    struct _edge* twin;
+    struct edge* next;
+    struct edge* twin;
+
+    struct face* home;
 
 } edge;
 
-typedef struct _face {
+typedef struct face {
 
     vertex site;
     edge top_edge;
 
 } face;
 
-typedef struct _face_list {
+typedef struct face_list {
 
     face* collection;
 
@@ -41,5 +45,7 @@ face* pop_next_face( face_list* list );
 void destroy_face_list( face_list* list );
 
 void remove_face_edges( face* f );
+
+edge* create_edge( face* parent );
 
 #endif

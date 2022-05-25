@@ -52,7 +52,6 @@ vertex circumcenter( arc* local ) {
     return fin;
 }
 
-
 static inline float quad_x( float f, float h, float p, float k, float m, float b ) {
 
     return (f * sqrtf(p) * sqrt( b + ( h * m ) - k + ( m * m * p ) )) + h + (2 * m * p);
@@ -170,7 +169,7 @@ void insert_face( arc* segment, face* parent, vertex_list* vlist ) {
     edge* left_rev = new_left->reverse;
     edge* center_rev = new_center->reverse;
     
-    edge* new_reverse = (edge*) malloc( sizeof(edge) );
+    edge* new_reverse = create_edge( segment->parent );
     edge* exit = segment->reverse->next;
 
     segment->reverse->next = new_reverse;
@@ -266,8 +265,8 @@ void circle_event( line* ln, vertex_event* v_event ) {
 
     // center strike
 
-    edge* strike_right = (edge*) malloc( sizeof(edge) );
-    edge* strike_left = (edge*) malloc( sizeof(edge) );
+    edge* strike_right = create_edge( search->next->parent );
+    edge* strike_left = create_edge( search->prev->parent );
 
     strike_right->twin = strike_left;
     strike_left->twin = strike_right;
@@ -319,7 +318,7 @@ arc* create_arc( face* parent ) {
     new_arc->prev = NULL;
     new_arc->pinch = NULL;
 
-    new_arc->reverse = (edge*) malloc( sizeof(edge) );
+    new_arc->reverse = create_edge( parent );
     new_arc->reverse->next = &(parent->top_edge);
     new_arc->reverse->twin = NULL;
 

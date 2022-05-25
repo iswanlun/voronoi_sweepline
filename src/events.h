@@ -3,16 +3,16 @@
 
 #include "faces.h"
 
-typedef struct _vertex_event {
+typedef struct vertex_event {
 
     vertex v_site;
     float sweep_y;
 
-    struct _vertex_event* next;    
+    struct vertex_event* next;    
 
 } vertex_event;
 
-typedef struct _vertex_list {
+typedef struct vertex_list {
 
     vertex_event* head;
     int length;

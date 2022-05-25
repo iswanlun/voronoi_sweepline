@@ -3,19 +3,19 @@
 
 #include "events.h"
 
-typedef struct _arc {
+typedef struct arc {
 
     face* parent; // vertex source
     edge* reverse;
     
-    struct _arc* prev;
-    struct _arc* next;
+    struct arc* prev;
+    struct arc* next;
 
     vertex_event* pinch;
 
 } arc;
 
-typedef struct _line {
+typedef struct line {
 
     arc* head;
     int bias;
@@ -24,11 +24,11 @@ typedef struct _line {
 
 line* create_line( void );
 
-void destroy_line( line* l );
+void destroy_line( line* ln );
 
-void site_event( line* l, face* parent, vertex_list* vlist );
+void site_event( line* ln, face* parent, vertex_list* vlist );
 
-void circle_event( line* l, vertex_event* v_event );
+void circle_event( line* ln, vertex_event* v_event );
 
 arc* create_arc( face* parent );
 
