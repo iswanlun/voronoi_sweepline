@@ -87,13 +87,9 @@ vertex_event* next_vertex_event( vertex_list* list ) {
     return tmp;
 }
 
-float peek_vertex_event( vertex_list* list ) {
+vertex_event* peek_vertex_event( vertex_list* list ) {
 
-    if ( list->head != NULL ) {
-        return list->head->sweep_y;
-    } else {
-        return 0;
-    }
+    return list->head;
 }
 
 void null_vertex_event( vertex_list* list, vertex_event** dest ) {

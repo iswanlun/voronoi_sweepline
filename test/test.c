@@ -79,7 +79,7 @@ int test_vertex_events( void ) {
     insert_vertex_event( list, &(ext), 10, 0, -1);
     insert_vertex_event( list, &(dud), 11, 0, 41);
 
-    printf("  Top value (41) -> %f \n", peek_vertex_event(list));
+    printf("  Top value (41) -> %f \n", peek_vertex_event(list)->sweep_y);
 
     vertex_event* index = list->head;
 

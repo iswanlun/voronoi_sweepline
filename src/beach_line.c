@@ -223,37 +223,39 @@ void site_event( line* ln, face* parent, vertex_list* vlist ) {
     }
 }
 
-arc* find_left( arc* this, arc* next, vertex_event* v_event );
+arc* find_left( arc* this, arc* next, vertex_event* v_event, int* bias );
 
-arc* find_right( arc* this, arc* next, vertex_event* v_event ) {
+arc* find_right( arc* this, arc* next, vertex_event* v_event, int* bias ) {
 
     if ( this == NULL ) {
-        return find_left( next, NULL, v_event );
+        return find_left( next, NULL, v_event, bias );
     
     } else if ( this->pinch == v_event ) {
+        (*bias)--;
         return this;
     
     } else {
-        return find_left( next, this->next, v_event );
+        return find_left( next, this->next, v_event, bias );
     }
 }
 
-arc* find_left( arc* this, arc* next, vertex_event* v_event ) {
+arc* find_left( arc* this, arc* next, vertex_event* v_event, int* bias ) {
 
     if ( this == NULL ) {
-        return find_right( next, NULL, v_event );
+        return find_right( next, NULL, v_event, bias );
     
     } else if ( this->pinch == v_event ) {
+        (*bias)++;
         return this;
 
     } else {
-        return find_right( next, this->prev, v_event );
+        return find_right( next, this->prev, v_event, bias );
     }
 }
 
-void circle_event( line* ln, vertex_event* v_event ) { // TODO: refactor to recursive
+void circle_event( line* ln, vertex_event* v_event ) { 
 
-    arc* search = find_right( ln->head, ln->head->prev, v_event );
+    arc* search = find_right( ln->head, ln->head->prev, v_event, &(ln->bias) );
 
     // center arc
 
@@ -296,6 +298,17 @@ void circle_event( line* ln, vertex_event* v_event ) { // TODO: refactor to recu
 
     free(search->reverse);
     free(search);
+
+    // shift beach line head
+
+    if ( ln->bias > 1 ) {
+        ln->head = ln->head->next;
+        ln->bias = 0;
+
+    } else if ( ln->bias < -1 ) {
+        ln->head = ln->head->prev;
+        ln->bias = 0;
+    }
 }
 
 arc* create_arc( face* parent ) {
@@ -318,6 +331,7 @@ line* create_line( void ) {
 
     line* beach_line = (line*) malloc( sizeof(line) );
     beach_line->head = NULL;
+    beach_line->bias = 0;
 
     return beach_line;
 }

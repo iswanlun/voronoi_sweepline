@@ -15,14 +15,13 @@ typedef struct _vertex_event {
 typedef struct _vertex_list {
 
     vertex_event* head;
-
     int length;
 
 } vertex_list;
 
 void insert_vertex_event( vertex_list* list, vertex_event** event, float v_x, float v_y, float sweep_y );
 
-float peek_vertex_event( vertex_list* list );
+vertex_event* peek_vertex_event( vertex_list* list );
 
 vertex_event* next_vertex_event( vertex_list* list );
 

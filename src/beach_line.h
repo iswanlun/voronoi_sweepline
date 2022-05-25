@@ -18,6 +18,7 @@ typedef struct _arc {
 typedef struct _line {
 
     arc* head;
+    int bias;
 
 } line;
 
