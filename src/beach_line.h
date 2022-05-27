@@ -20,9 +20,12 @@ typedef struct line {
     arc* head;
     int bias;
 
+    vertex top_right;
+    vertex lower_left;
+
 } line;
 
-line* create_line( void );
+line* create_line( vertex ll, vertex tr );
 
 void destroy_line( line* ln );
 

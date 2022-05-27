@@ -1,6 +1,9 @@
 #include "fortune.h"
 #include "stddef.h"
 
+void bound_face( edge* out, vertex ll, vertex tr ) {
+    
+}
 
 void bound_faces( face_list* list, vertex ll, vertex tr ) {
 
@@ -22,7 +25,7 @@ void bound_faces( face_list* list, vertex ll, vertex tr ) {
 face_list* fortunes_sweep_line( vertex* sites, int size, vertex ll, vertex tr ) {
 
     face_list* list = create_face_list( sites, size );
-    line* ln = create_line();
+    line* ln = create_line( ll, tr );
     vertex_list* vlist = create_vertex_list();
 
     vertex_event* v_event = next_vertex_event( vlist );
