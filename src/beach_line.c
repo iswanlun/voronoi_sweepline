@@ -252,7 +252,7 @@ arc* find_left( arc* this, arc* next, vertex_event* v_event, int* bias ) {
     }
 }
 
-void circle_event( line* ln, vertex_event* v_event ) { 
+void circle_event( line* ln, vertex_event* v_event, vertex_list* vlist ) { 
 
     arc* search = find_right( ln->head, ln->head->prev, v_event, &(ln->bias) );
 
@@ -313,6 +313,9 @@ void circle_event( line* ln, vertex_event* v_event ) {
         ln->head = ln->head->prev;
         ln->bias = 0;
     }
+
+    recalculate_vertex_event( left, vlist, v_event->sweep_y );
+    recalculate_vertex_event( left, vlist, v_event->sweep_y );
 }
 
 arc* create_arc( face* parent ) {

@@ -31,7 +31,7 @@ void destroy_line( line* ln );
 
 void site_event( line* ln, face* parent, vertex_list* vlist );
 
-void circle_event( line* ln, vertex_event* v_event );
+void circle_event( line* ln, vertex_event* v_event, vertex_list* vlist );
 
 arc* create_arc( face* parent );
 

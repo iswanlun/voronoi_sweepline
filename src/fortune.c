@@ -1,23 +1,108 @@
 #include "fortune.h"
 #include "stddef.h"
+#include "limits.h"
 
-void bound_face( edge* out, vertex ll, vertex tr ) {
-    
+#define VALID_EDGE(e) (e->origin.x != INT_MIN && e->origin.y != INT_MIN)
+
+void bound_face( edge* start, vertex ll, vertex tr );
+
+void bound_free_face( edge* start, vertex ll, vertex tr ) {
+
+    // start with a twinned edge
+
+    // unbound faces will intersect two sides, find both intersections
+
+    // create only the points needed for the first twin - null - twin set, leaving a return pathway
+
+    edge* out = start;
+    edge* index = out->next;
+
+    while ( index->twin == NULL && index != start ) {
+
+        index = index->next;
+    }
+
+    edge* in = index;
+
+    if ( index == start ) { // full circle, no neighbors
+        
+        if ( index->twin == NULL ) { // single point no slope
+
+        }
+
+    } else {
+        // use slope and direction to find intersection for ONE HALF only (up until next twin)
+
+    }
+
+
+    bound_face( in->twin, ll, tr );
+}
+
+void bound_face( edge* start, vertex ll, vertex tr ) {
+
+    // find out line else find in line
+
+    edge* out;
+    edge* in;
+
+    if ( VALID_EDGE(start) ) {
+
+        edge* index = start;
+        
+        while ( VALID_EDGE(index->next) && index->next != start ) {
+
+            index = index->next;
+        }
+
+        if ( index->next == start ) {
+            return; // when whole diagram complete
+        }
+
+        out = index;
+
+        while( !VALID_EDGE(index->next) ) {
+            index = index->next;
+        }
+
+        in = index;
+
+    } else {
+
+        edge* index = start;
+        
+        while ( !VALID_EDGE(index->next) && index->next != start ) {
+
+            index = index->next;
+        }
+
+        if ( index->next == start ) { 
+            bound_free_face( start, ll, tr ); // special case, no vertex polygon
+        }
+
+        in = index;
+
+        while( VALID_EDGE(index->next) ) {
+            index = index->next;
+        }
+
+        out = index;
+    }
+
+    // create bisector from out to in
+
+    // remove all other edges
+
+    // set the vertex of the bisector at the bounds
+
+    // set the vertex of in at the bounds
+
+    bound_face( in->twin, ll, tr );
 }
 
 void bound_faces( face_list* list, vertex ll, vertex tr ) {
 
-    // start with the first face and work clockwise
-
-    // restrict vertices to bounds
-
-    // find out line
-
-    // find in line
-
-    // remove eveything in between
-
-    // start at twin of in line
+    // find the out line for the first face in face list
 
 }
 
@@ -38,7 +123,7 @@ face_list* fortunes_sweep_line( vertex* sites, int size, vertex ll, vertex tr ) 
             f_event = pop_next_face( list );
 
         } else if ( f_event == NULL ) {
-            circle_event( ln, v_event );
+            circle_event( ln, v_event, vlist );
             v_event = next_vertex_event( vlist );
 
         } else {
@@ -47,7 +132,7 @@ face_list* fortunes_sweep_line( vertex* sites, int size, vertex ll, vertex tr ) 
                 f_event = pop_next_face( list );
 
             } else {
-                circle_event( ln, v_event );
+                circle_event( ln, v_event, vlist );
                 v_event = next_vertex_event( vlist );
             }
         }
