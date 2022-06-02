@@ -34,9 +34,11 @@ typedef struct face_list {
     int size;
     int index;
 
+    vertex bounds[4];
+
 } face_list;
 
-face_list* create_face_list( vertex* sites, int size );
+face_list* create_face_list( vertex* sites, int size, vertex ll, vertex tr );
 
 face* peek_next_face( face_list* list );
 

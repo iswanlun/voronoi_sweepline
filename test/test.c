@@ -4,6 +4,15 @@
 #include <stdlib.h>
 
 int test_face_creation( void ) {
+
+    vertex ll;
+    vertex tr;
+
+    ll.x = -5;
+    ll.y = -40;
+
+    tr.x = 5;
+    tr.y = 20;
     
     int list_size = 10;
 
@@ -30,14 +39,14 @@ int test_face_creation( void ) {
     points[9].x = 0;
     points[9].y = 2;
     
-    face_list* list = create_face_list( points, list_size );
+    face_list* list = create_face_list( points, list_size, ll, tr );
 
     float prev = list->collection[0].site.y;
     int pass = 1;
 
     printf("  Face list:\n");
 
-    for (int i = 0; i < list_size; i++ ) {
+    for (int i = 0; i < list_size + 4; i++ ) {
 
         printf("    x: %f y: %f \n", list->collection[i].site.x, list->collection[i].site.y );
         pass &= (prev >= list->collection[i].site.y) ? 1 : 0;

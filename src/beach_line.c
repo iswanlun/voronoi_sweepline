@@ -260,6 +260,7 @@ void circle_event( line* ln, vertex_event* v_event, vertex_list* vlist ) {
 
     edge* lead = search->next->reverse->next->twin;
     lead->next = search->reverse->next;
+    lead->next->origin = search->pinch->v_site;
 
     // center strike
 
@@ -268,29 +269,20 @@ void circle_event( line* ln, vertex_event* v_event, vertex_list* vlist ) {
 
     strike_right->twin = strike_left;
     strike_left->twin = strike_right;
+    strike_left->origin = search->pinch->v_site;
 
     // right arc
 
     edge* right_lead = lead->twin;
     strike_right->next = right_lead;
     search->next->reverse->next = strike_right;
+    right_lead->origin = search->pinch->v_site;
 
     // left arc
 
     edge* left_lead = lead->next->twin;
     left_lead->next = strike_left;
     strike_left->next = search->prev->reverse;
-
-    // set vertex if valid
-
-    if ( search->pinch->v_site.x <= ln->top_right.x &&
-            search->pinch->v_site.x >= ln->lower_left.x &&
-            search->pinch->v_site.y <= ln->top_right.y &&
-            search->pinch->v_site.y >= ln->lower_left.y ) {
-        strike_left->origin = search->pinch->v_site;
-        right_lead->origin = search->pinch->v_site;
-        lead->next->origin = search->pinch->v_site;
-    }
 
     // arc removal
 

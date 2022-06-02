@@ -50,13 +50,13 @@ face* sort_faces( face* list, int size ) {
     }
 }
 
-face_list* create_face_list( vertex* sites, int size ) {
+face_list* create_face_list( vertex* sites, int size, vertex ll, vertex tr ) {
 
     face_list* fin = (face_list*) malloc( sizeof(face_list) );
-    fin->size = size;
+    fin->size = (size + 4);
     fin->index = 0;
 
-    fin->collection = (face*) calloc( sizeof(face), size );
+    fin->collection = (face*) calloc( sizeof(face), (size + 4) );
 
     for ( int i = 0; i < size; i++ ) {
         fin->collection[i].site = sites[i];
@@ -64,7 +64,42 @@ face_list* create_face_list( vertex* sites, int size ) {
         fin->collection[i].top_edge.home = &(fin->collection[i]);
     }
 
-    fin->collection = sort_faces( fin->collection, size );
+    for ( int i = size; i < (size + 4); i++ ) {
+        
+        fin->collection[i].top_edge.next = NULL;
+        fin->collection[i].top_edge.home = &(fin->collection[i]);
+    }
+
+    float height = tr.y - ll.y;
+    float width = tr.x - ll.x;
+
+    // 1 - Bounding points to remove
+    int index = size;
+    fin->collection[index].site.x = ll.x - width; 
+    fin->collection[index].site.y = ((ll.y + tr.y) / 2);
+
+    // 2
+    index++;
+    fin->collection[index].site.x = ((ll.x + tr.x) / 2); 
+    fin->collection[index].site.y = tr.y + height;
+
+    // 3
+    index++;
+    fin->collection[index].site.x = tr.x + width; 
+    fin->collection[index].site.y = ((ll.y + tr.y) / 2);
+
+    // 4
+    index++;
+    fin->collection[index].site.x = ((ll.x + tr.x) / 2); 
+    fin->collection[index].site.y = ll.y - height;
+
+    for ( int i = 0; i < 4; i++ ) {
+        fin->bounds[i].x = fin->collection[index].site.x;
+        fin->bounds[i].y = fin->collection[index].site.y;
+        index--;
+    }
+
+    fin->collection = sort_faces( fin->collection, (size + 4) );
     return fin;
 }
 
@@ -118,7 +153,6 @@ edge* create_edge( face* parent ) {
     fin->next = NULL;
     fin->twin = NULL;
     fin->home = parent;
-    
     fin->origin.x = INT_MIN;
     fin->origin.y = INT_MIN;
 

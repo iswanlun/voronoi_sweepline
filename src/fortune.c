@@ -4,112 +4,19 @@
 
 #define VALID_EDGE(e) (e->origin.x != INT_MIN && e->origin.y != INT_MIN)
 
-void bound_face( edge* start, vertex ll, vertex tr );
 
-void bound_free_face( edge* start, vertex ll, vertex tr ) {
-
-    // start with a twinned edge
-
-    // unbound faces will intersect two sides, find both intersections
-
-    // create only the points needed for the first twin - null - twin set, leaving a return pathway
-
-    edge* out = start;
-    edge* index = out->next;
-
-    while ( index->twin == NULL && index != start ) {
-
-        index = index->next;
-    }
-
-    edge* in = index;
-
-    if ( index == start ) { // full circle, no neighbors
-        
-        if ( index->twin == NULL ) { // single point no slope
-
-        }
-
-    } else {
-        // use slope and direction to find intersection for ONE HALF only (up until next twin)
-
-    }
-
-
-    bound_face( in->twin, ll, tr );
-}
-
-void bound_face( edge* start, vertex ll, vertex tr ) {
-
-    // find out line else find in line
-
-    edge* out;
-    edge* in;
-
-    if ( VALID_EDGE(start) ) {
-
-        edge* index = start;
-        
-        while ( VALID_EDGE(index->next) && index->next != start ) {
-
-            index = index->next;
-        }
-
-        if ( index->next == start ) {
-            return; // when whole diagram complete
-        }
-
-        out = index;
-
-        while( !VALID_EDGE(index->next) ) {
-            index = index->next;
-        }
-
-        in = index;
-
-    } else {
-
-        edge* index = start;
-        
-        while ( !VALID_EDGE(index->next) && index->next != start ) {
-
-            index = index->next;
-        }
-
-        if ( index->next == start ) { 
-            bound_free_face( start, ll, tr ); // special case, no vertex polygon
-        }
-
-        in = index;
-
-        while( VALID_EDGE(index->next) ) {
-            index = index->next;
-        }
-
-        out = index;
-    }
-
-    // create bisector from out to in
-
-    // remove all other edges
-
-    // set the vertex of the bisector at the bounds
-
-    // set the vertex of in at the bounds
-
-    bound_face( in->twin, ll, tr );
-}
 
 void bound_faces( face_list* list, vertex ll, vertex tr ) {
 
-    // find the out line for the first face in face list
+    
+    // remove four excess faces and push vertices to bounds
 
 }
 
 
 face_list* fortunes_sweep_line( vertex* sites, int size, vertex ll, vertex tr ) {
 
-    face_list* list = create_face_list( sites, size );
+    face_list* list = create_face_list( sites, size, ll, tr );
     line* ln = create_line( ll, tr );
     vertex_list* vlist = create_vertex_list();
 
