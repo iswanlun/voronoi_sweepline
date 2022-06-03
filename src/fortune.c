@@ -14,27 +14,56 @@ void correct_to_bounds( face* f1, face* f2, edge* e, vertex ll, vertex tr ) {
 
 }
 
-void correct_to_edge( edge* start, edge* stop, vertex ll, vertex tr ) {
+float distance( vertex v1, vertex v2 ) {
 
-    if ( start == stop ) {
+    return sqrtf(powf((v2.x - v1.x), 2) + powf((v2.y - v1.y), 2));
+}
+
+// result < 0 -> clockwise; result > 0 -> counter-clockwise
+float clockwise( vertex a, vertex b, vertex c ) {
+
+    return ((b.x * c.y) + (a.x * b.y) + (a.y * c.x)) - ((a.y * b.x) + (b.y * c.x) + (a.x * c.y));
+}
+
+void correct_to_edge( edge* curr, edge* out, edge* in, vertex ll, vertex tr ) {
+    
+    if ( curr == in ) {
         return;
     }
 
-    if ( start->origin.x < ll.x ) {
-        start->origin.x = ll.x;
+    if ( curr->origin.x < ll.x ) {
+        curr->origin.x = ll.x;
 
-    } else if ( start->origin.x > tr.x ) {
-        start->origin.x = tr.x;
+    } else if ( curr->origin.x > tr.x ) {
+        curr->origin.x = tr.x;
     }
 
-    if ( start->origin.y < ll.y ) {
-        start->origin.y = ll.y;
+    if ( curr->origin.y < ll.y ) {
+        curr->origin.y = ll.y;
 
-    } else if ( start->origin.y > tr.y ) {
-        start->origin.y = tr.y;
+    } else if ( curr->origin.y > tr.y ) {
+        curr->origin.y = tr.y;
     }
 
-    correct_to_edge( start->next, stop, ll, tr );
+    if ( (out->origin.x == curr->origin.x && out->origin.y != curr->origin.y) ^ 
+         (out->origin.y == curr->origin.y && out->origin.x != curr->origin.x) ) {
+
+        if ( clockwise( out->home->site, out->origin, curr->origin ) > 0 ) { // 
+
+            curr->origin = out->origin;  
+        } 
+    }
+
+    if ( (in->origin.x == curr->origin.x && in->origin.y != curr->origin.y) ^ 
+         (in->origin.y == curr->origin.y && in->origin.x != curr->origin.x) ) {
+
+        if ( clockwise( in->home->site, in->origin, curr->origin ) < 0 ) {
+
+            curr->origin = in->origin;
+        }
+    }
+
+    correct_to_edge( curr->next, out, in, ll, tr );
 }
 
 void bound_face( edge* start, vertex ll, vertex tr ) {
@@ -111,10 +140,7 @@ void bound_face( edge* start, vertex ll, vertex tr ) {
 
     // correct to lines
 
-    correct_to_edge( out->next->next, in, ll, tr );
-
-
-    // remove duplicates
+    correct_to_edge( out->next->next, out->next, in, ll, tr );
 
     bound_face( in->twin, ll, tr );
 }
