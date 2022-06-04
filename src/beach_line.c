@@ -146,12 +146,42 @@ arc* search_right( arc* segment, float x, float s ) {
     }
 }
 
+arc* create_new_arc( face* parent ) {
+
+    arc* new_arc = (arc*) malloc( sizeof(arc) );
+    new_arc->parent = parent;
+    new_arc->next = NULL;
+    new_arc->prev = NULL;
+    new_arc->pinch = NULL;
+
+    new_arc->reverse = create_edge( parent );
+    
+    new_arc->reverse->next = parent->top_edge;
+    parent->top_edge->next = new_arc->reverse;
+
+    return new_arc;
+}
+
+arc* duplicate_arc( face* parent ) {
+
+    arc* new_arc = (arc*) malloc( sizeof(arc) );
+    new_arc->parent = parent;
+    new_arc->next = NULL;
+    new_arc->prev = NULL;
+    new_arc->pinch = NULL;
+
+    new_arc->reverse = create_edge( parent );
+    
+    return new_arc;
+}
+
 void insert_face( arc* segment, face* parent, vertex_list* vlist ) {
 
     // split the arc
     
-    arc* new_center = create_arc( parent );
-    arc* new_left = create_arc( segment->parent );
+    arc* new_center = create_new_arc( parent );
+    arc* new_left = duplicate_arc( segment->parent );
+
     arc* far_left = segment->prev;
 
     if ( far_left != NULL ) {
@@ -194,7 +224,7 @@ void insert_face( arc* segment, face* parent, vertex_list* vlist ) {
 void site_event( line* ln, face* parent, vertex_list* vlist ) {
 
     if ( ln->head == NULL ) {
-        ln->head = create_arc( parent );
+        ln->head = create_new_arc( parent );
         return;
     }
 
@@ -308,22 +338,6 @@ void circle_event( line* ln, vertex_event* v_event, vertex_list* vlist ) {
 
     recalculate_vertex_event( left, vlist, v_event->sweep_y );
     recalculate_vertex_event( left, vlist, v_event->sweep_y );
-}
-
-arc* create_arc( face* parent ) {
-
-    arc* new_arc = (arc*) malloc( sizeof(arc) );
-    new_arc->parent = parent;
-    new_arc->next = NULL;
-    new_arc->prev = NULL;
-    new_arc->pinch = NULL;
-
-    new_arc->reverse = create_edge( parent );
-    
-    new_arc->reverse->next = parent->top_edge;
-    parent->top_edge->next = new_arc->reverse;
-
-    return new_arc;
 }
 
 line* create_line( vertex ll, vertex tr ) {
