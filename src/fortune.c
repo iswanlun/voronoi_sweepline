@@ -46,11 +46,7 @@ int is_crosscut( edge* e, float line, int is_x ) {
     return test;
 }
 
-void bound_face( edge* out, edge* stop, float line, int is_x ) {
-
-    if ( out->twin == stop ) {
-        return;
-    }
+edge* bound_face( edge* out, edge* stop, float line, int is_x ) {
 
     edge* in = out->next;
 
@@ -95,34 +91,81 @@ void bound_face( edge* out, edge* stop, float line, int is_x ) {
 
     if ( in != stop ) {
         in->origin = intersect( in->home->site, in->twin->home->site, line, is_x );
+        return bound_face( in->twin, stop, line, is_x );
+    
+    } else {
+        return middle;
     }
-
-    bound_face( in->twin, stop, line, is_x );
 }
 
-void smash_in_corners(  ) {
+// smash trifecta of vertices to single point
+void smash_in_corner( edge* to_set, vertex ll, vertex tr ) {
     
-    if ( curr->origin.x < ll.x ) {
-        curr->origin.x = ll.x;
+    for ( int i = 0; i < 3; i++ ) {
+    
+        if ( to_set->origin.x < ll.x ) {
+            to_set->origin.x = ll.x;
 
-    } else if ( curr->origin.x > tr.x ) {
-        curr->origin.x = tr.x;
+        } else if ( to_set->origin.x > tr.x ) {
+            to_set->origin.x = tr.x;
+        }
+
+        if ( to_set->origin.y < ll.y ) {
+            to_set->origin.y = ll.y;
+
+        } else if ( to_set->origin.y > tr.y ) {
+            to_set->origin.y = tr.y;
+        }
+
+        to_set = to_set->twin->next;
+    }
+}
+
+// test face to detirmine if one of four
+int is_bound( face* f, vertex* list ) {
+
+    if ( f == NULL ) {
+        return 0;
     }
 
-    if ( curr->origin.y < ll.y ) {
-        curr->origin.y = ll.y;
+    int test = 0;
 
-    } else if ( curr->origin.y > tr.y ) {
-        curr->origin.y = tr.y;
+    for ( int i = 0; i < 4; i++ ) {
+
+        test |= ((f->site.x == list[i].x) && (f->site.y == list[i].y));
     }
+
+    return test;
 }
 
 void bound_faces( face_list* list, vertex ll, vertex tr ) {
 
     // smash in four corners
 
+    face* top_bound = &(list->collection[0]);
+
+    edge* out_edge[4];
+    edge* e = &(top_bound->top_edge);
+
+    for ( int i = 0; i < 4; i++ ) {
+
+        while ( 0 == is_bound(e->twin, list->bounds) ) {
+            e = e->next;
+        }
+
+        smash_in_corner( e->next, ll, tr );
+        out_edge[i] = e->next->twin;
+
+        e = e->twin->next;
+    }
+
     // bound the four edges
-    
+
+    out_edge[1] = bound_face( out_edge[0], out_edge[1]->next, tr.x, 1);
+    out_edge[2] = bound_face( out_edge[1], out_edge[2]->next, ll.y, 0);
+    out_edge[3] = bound_face( out_edge[2], out_edge[3]->next, ll.x, 1);
+    bound_face( out_edge[3], out_edge[0]->next, tr.y, 0);
+
     // remove four boundary faces
 }
 
