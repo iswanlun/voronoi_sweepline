@@ -47,7 +47,7 @@ int test_face_creation( void ) {
 
     printf("  Face list:\n");
 
-    for (int i = 0; i < list_size + 4; i++ ) {
+    for (int i = 0; i < list->size; i++ ) {
 
         printf("    x: %f y: %f \n", list->collection[i].site.x, list->collection[i].site.y );
         pass &= (prev >= list->collection[i].site.y) ? 1 : 0;
@@ -132,6 +132,105 @@ int test_vertex_events( void ) {
     return pass;
 }
 
+void print_face( face* f ) {
+
+    printf("  FACE - x: %f y: %f \n", f->site.x, f->site.y );
+
+    edge* index = f->top_edge;
+
+    do {
+
+        printf("    POINT: - x: %f y: %f \n", index->origin.x, index->origin.y );
+        index = index->next;
+
+    } while ( index != NULL && index != f->top_edge );
+
+    if ( index == NULL ) {
+        printf("\n -- fail to connect, null next error -- \n");
+    }
+     
+}
+
+int test_site_event_insertion( void ) {
+    
+    vertex ll;
+    vertex tr;
+
+    ll.x = -10;
+    ll.y = -10;
+
+    tr.x = 10;
+    tr.y = 10;
+
+    vertex points[1];
+
+    points[0].x = -1;
+    points[0].y = 6;
+
+    line* ln = create_line( ll, tr );
+    vertex_list* vlist = create_vertex_list();
+
+    face_list* flist = create_face_list( points, 1, ll, tr );
+
+    printf("\n  Staring face stack: \n");
+
+    for ( int i = 0; i < 5; i++ ) {
+
+        print_face( &(flist->collection[i]) );
+    }
+    
+    site_event( ln, pop_next_face( flist ), vlist );
+
+    printf("\n  After single site event: \n");
+
+    for ( int i = 0; i < 5; i++ ) {
+
+        print_face( &(flist->collection[i]) );
+    }
+
+    site_event( ln, pop_next_face( flist ), vlist );
+
+    printf("\n  After second site event: \n");
+
+    for ( int i = 0; i < 5; i++ ) {
+
+        print_face( &(flist->collection[i]) );
+    }
+
+    for ( int i = 2; i < 4; i++ ) {
+
+        site_event( ln, pop_next_face( flist ), vlist );
+    }
+
+    printf("\n  Next face in stack: \n");
+    print_face( peek_next_face( flist ) );
+
+    printf("\n  Vertex event count: %d \n", vlist->length );
+
+    vertex_event* ve_next1 = next_vertex_event( vlist );
+    vertex_event* ve_next2 = next_vertex_event( vlist );
+
+    printf("  Vertex event: x: %f y: %f s: %f \n",  ve_next1->v_site.x, ve_next1->v_site.y, ve_next1->sweep_y );
+    printf("  Vertex event: x: %f y: %f s: %f \n",  ve_next2->v_site.x, ve_next2->v_site.y, ve_next2->sweep_y );
+
+    circle_event( ln, ve_next1, vlist );
+    circle_event( ln, ve_next2, vlist );
+
+    free(ve_next1);
+    free(ve_next2);
+
+
+    for ( int i = 0; i < 4; i++ ) {
+
+        print_face( &(flist->collection[i]) );
+    }
+
+    destroy_line( ln );
+    dispose_vertex_list( vlist );
+
+    return 1;
+}
+
 int test_fortune( void ) {
 
     vertex sites[3];
@@ -156,7 +255,7 @@ int test_fortune( void ) {
 
     for ( int i = 0; i < f_list->size; i++ ) {
 
-        edge* index = &(f_list->collection[i].top_edge);
+        edge* index = f_list->collection[i].top_edge;
 
         printf("  face - x: %f y: %f ", index->home->site.x, index->home->site.y );
 
@@ -164,44 +263,8 @@ int test_fortune( void ) {
 
             printf("    point - x: %f y: %f ", index->origin.x, index->origin.y );
 
-        } while ( index != &(f_list->collection[i].top_edge) );
+        } while ( index != f_list->collection[i].top_edge );
     }    
-
-    return 1;
-}
-
-int test_site_event_insertion( void ) {
-    
-    vertex ll;
-    vertex tr;
-
-    ll.x = -10;
-    ll.y = -10;
-
-    tr.x = 104;
-    tr.y = 104;
-
-    line* ln = create_line( ll, tr );
-    vertex_list* vlist = create_vertex_list();
-
-    face* test_face[4];
-
-    for ( int i = 0; i < 4; i++ ) {
-
-        test_face[i] = (face*) malloc( sizeof(face) );
-
-        test_face[i]->site.x = 10 + (i * 10);
-        test_face[i]->site.y = 80 - (i * 5);;
-
-        site_event( ln, test_face[i], vlist );
-    }
-    
-    for ( int i = 0; i < 4; i++ ) {
-        free( test_face[i] );
-    }
-
-    destroy_line( ln );
-    dispose_vertex_list( vlist );
 
     return 1;
 }

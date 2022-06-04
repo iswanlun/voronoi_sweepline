@@ -23,7 +23,7 @@ typedef struct edge {
 typedef struct face {
 
     vertex site;
-    edge top_edge;
+    edge* top_edge;
 
 } face;
 
@@ -34,7 +34,7 @@ typedef struct face_list {
     int size;
     int index;
 
-    vertex bounds[4];
+    face* bounds[4];
 
 } face_list;
 

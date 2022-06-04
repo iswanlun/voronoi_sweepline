@@ -1,6 +1,7 @@
 #include "fortune.h"
 #include "stddef.h"
 #include "limits.h"
+#include "stdio.h"
 
 face_list* fortunes_sweep_line( vertex* sites, int size, vertex ll, vertex tr ) {
 

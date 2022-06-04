@@ -176,11 +176,11 @@ void insert_face( arc* segment, face* parent, vertex_list* vlist ) {
     new_reverse->next = left_rev;
     left_rev->next = exit;
 
-    new_reverse->twin = &(parent->top_edge);
-    parent->top_edge.twin = new_reverse;
+    new_reverse->twin = parent->top_edge;
+    parent->top_edge->twin = new_reverse;
 
-    parent->top_edge.next = center_rev;
-    center_rev->next = &(parent->top_edge);
+    parent->top_edge->next = center_rev;
+    center_rev->next = parent->top_edge;
 
     // recalulate vertex_events
 
@@ -319,10 +319,10 @@ arc* create_arc( face* parent ) {
     new_arc->pinch = NULL;
 
     new_arc->reverse = create_edge( parent );
-    new_arc->reverse->next = &(parent->top_edge);
-    new_arc->reverse->twin = NULL;
+    
+    new_arc->reverse->next = parent->top_edge;
+    parent->top_edge->next = new_arc->reverse;
 
-    parent->top_edge.next = new_arc->reverse;
     return new_arc;
 }
 

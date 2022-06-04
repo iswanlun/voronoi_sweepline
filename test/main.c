@@ -9,8 +9,8 @@ int main( void ) {
 
     tests[0] = &test_face_creation;
     tests[1] = &test_vertex_events;
-    tests[2] = &test_fortune;
-    tests[3] = &test_site_event_insertion;
+    tests[2] = &test_site_event_insertion;
+    tests[3] = &test_fortune;
  
     for (int i = 0; i < TEST_COUNT; i++ ) {
 
