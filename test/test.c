@@ -1,5 +1,6 @@
 #include "test.h"
 #include "../src/beach_line.h"
+#include "../src/fortune.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -131,7 +132,40 @@ int test_vertex_events( void ) {
     return pass;
 }
 
-int test_beach_line_creation( void ) {
+int test_fortune( void ) {
+
+    vertex sites[3];
+
+    vertex ll;
+    vertex tr;
+
+    ll.x = 0;
+    ll.y = 0;
+
+    tr.x = 30;
+    tr.y = 30;
+
+    sites[0].x = 8;
+    sites[0].y = 14;
+    sites[1].x = 15;
+    sites[1].y = 14;
+    sites[3].x = 23;
+    sites[3].y = 14;
+
+    face_list* f_list = fortunes_sweep_line( sites, 3, ll, tr );
+
+    for ( int i = 0; i < f_list->size; i++ ) {
+
+        edge* index = &(f_list->collection[i].top_edge);
+
+        printf("  face - x: %f y: %f ", index->home->site.x, index->home->site.y );
+
+        do {
+
+            printf("    point - x: %f y: %f ", index->origin.x, index->origin.y );
+
+        } while ( index != &(f_list->collection[i].top_edge) );
+    }    
 
     return 1;
 }

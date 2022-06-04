@@ -50,4 +50,6 @@ void remove_face_edges( face* f );
 
 edge* create_edge( face* parent );
 
+void bound_faces( face_list* list, vertex ll, vertex tr );
+
 #endif

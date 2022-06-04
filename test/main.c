@@ -9,7 +9,7 @@ int main( void ) {
 
     tests[0] = &test_face_creation;
     tests[1] = &test_vertex_events;
-    tests[2] = &test_beach_line_creation;
+    tests[2] = &test_fortune;
     tests[3] = &test_site_event_insertion;
  
     for (int i = 0; i < TEST_COUNT; i++ ) {

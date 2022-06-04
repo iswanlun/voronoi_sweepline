@@ -82,8 +82,12 @@ void insert_vertex_event( vertex_list* list, vertex_event** event, float v_x, fl
 vertex_event* next_vertex_event( vertex_list* list ) {
 
     vertex_event* tmp = list->head;
-    list->head = list->head->next;
-    list->length--;
+    
+    if ( list->head != NULL ) {
+        list->head = list->head->next;
+        list->length--;
+    }
+    
     return tmp;
 }
 
