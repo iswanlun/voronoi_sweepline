@@ -2,35 +2,106 @@
 #include "stddef.h"
 #include "limits.h"
 
-int valid_edge( edge* e, vertex ll, vertex tr ) {
+vertex intersect( vertex f1, vertex f2, float line, int is_x ) {
 
-    return  ( e->origin.x >= ll.x ) && 
-            ( e->origin.x <= tr.x ) && 
-            ( e->origin.y >= ll.y ) &&
-            ( e->origin.y <= tr.y ); 
+    vertex fin;
+
+    if ( f1.y == f2.y ) {
+
+        fin.x = ( f1.x + f2.x ) / 2;
+        fin.y = line;
+
+    } else {
+        
+        float m = ( -1 * (f2.x - f1.x)) / (f2.y - f1.y);
+        float b = ((f2.y + f1.y) / 2) - (m * ((f2.x + f1.x) / 2));
+        
+        if ( is_x ) {
+
+            fin.x = line;
+            fin.y = (m * line) + b;
+
+        } else {
+
+            fin.x = ( line - b ) / ((m == 0) ? 1 : m);
+            fin.y = line;
+        }
+
+    }
+
+    return fin;
 }
 
-void correct_to_bounds( face* f1, face* f2, edge* e, vertex ll, vertex tr ) {
+int is_crosscut( edge* e, float line, int is_x ) {
 
+    int test = 0;
+
+    if ( is_x ) {
+        test |= ((e->origin.x > line) ? 1 : 0) ^ ((e->next->origin.x > line) ? 1 : 0);
+
+    } else {
+        test |= ((e->origin.y > line) ? 1 : 0) ^ ((e->next->origin.y > line) ? 1 : 0);
+    }
+
+    return test;
 }
 
-float distance( vertex v1, vertex v2 ) {
+void bound_face( edge* out, edge* stop, float line, int is_x ) {
 
-    return sqrtf(powf((v2.x - v1.x), 2) + powf((v2.y - v1.y), 2));
-}
-
-// result < 0 -> clockwise; result > 0 -> counter-clockwise
-float clockwise( vertex a, vertex b, vertex c ) {
-
-    return ((b.x * c.y) + (a.x * b.y) + (a.y * c.x)) - ((a.y * b.x) + (b.y * c.x) + (a.x * c.y));
-}
-
-void correct_to_edge( edge* curr, edge* out, edge* in, vertex ll, vertex tr ) {
-    
-    if ( curr == in ) {
+    if ( out->twin == stop ) {
         return;
     }
 
+    edge* in = out->next;
+
+    while ( (is_crosscut( in, line, is_x ) == 0) && in != stop ) {
+        in = in->next;
+    }
+
+    // check difference between in and out
+
+    edge* middle;
+
+    if ( out->next == in ) {
+        middle = create_edge( out->home );
+        out->next = middle;
+        middle->next = in;
+
+    } else {
+        
+        middle = out->next;
+
+        while ( middle->next != in ) {
+
+            if ( middle->next == &(middle->home->top_edge) ) {
+
+                edge* new_mid = &(middle->home->top_edge);
+                middle->twin->twin = NULL;
+                free(middle);
+                out->next = new_mid;
+                middle = new_mid;
+            
+            } else {
+
+                edge* new_next = middle->next->next;
+                middle->next->twin->twin = NULL;
+                free(middle->next);
+                middle->next = new_next;
+            }
+        }
+    }
+
+    middle->origin = out->twin->origin;
+
+    if ( in != stop ) {
+        in->origin = intersect( in->home->site, in->twin->home->site, line, is_x );
+    }
+
+    bound_face( in->twin, stop, line, is_x );
+}
+
+void smash_in_corners(  ) {
+    
     if ( curr->origin.x < ll.x ) {
         curr->origin.x = ll.x;
 
@@ -44,115 +115,13 @@ void correct_to_edge( edge* curr, edge* out, edge* in, vertex ll, vertex tr ) {
     } else if ( curr->origin.y > tr.y ) {
         curr->origin.y = tr.y;
     }
-
-    if ( (out->origin.x == curr->origin.x && out->origin.y != curr->origin.y) ^ 
-         (out->origin.y == curr->origin.y && out->origin.x != curr->origin.x) ) {
-
-        if ( clockwise( out->home->site, out->origin, curr->origin ) > 0 ) { // 
-
-            curr->origin = out->origin;  
-        } 
-    }
-
-    if ( (in->origin.x == curr->origin.x && in->origin.y != curr->origin.y) ^ 
-         (in->origin.y == curr->origin.y && in->origin.x != curr->origin.x) ) {
-
-        if ( clockwise( in->home->site, in->origin, curr->origin ) < 0 ) {
-
-            curr->origin = in->origin;
-        }
-    }
-
-    correct_to_edge( curr->next, out, in, ll, tr );
-}
-
-void bound_face( edge* start, vertex ll, vertex tr ) {
-
-    // find out line else find in line
-
-    edge* out;
-    edge* in;
-
-    if ( valid_edge(start, ll, tr) ) {
-
-        edge* index = start;
-
-        while ( valid_edge(index->next, ll, tr) && index->next != start ) {
-
-            index = index->next;
-        }
-
-        if ( index->next == start ) {
-            return; // when whole diagram complete
-        }
-
-        out = index;
-
-        while( !valid_edge(index->next, ll, tr) ) {
-            index = index->next;
-        }
-
-        in = index;
-
-    } else {
-
-        edge* index = start;
-
-        while ( !valid_edge(index->next, ll, tr) && index->next != start ) {
-
-            index = index->next;
-        }
-
-        if ( index->next == start ) {
-
-            // bound edge for all
-
-            // find right
-
-            // find left
-
-
-            return;
-        }
-
-        in = index;
-
-        while( valid_edge(index->next, ll, tr) ) {
-            index = index->next;
-        }
-
-        out = index;
-    }
-
-    // check difference between in and out
-
-    if ( out->next == in ) {
-
-        edge* middle = create_edge( out->home );
-
-        out->next = middle;
-        middle->next = in;
-        middle->origin = in->origin;
-    }
-
-    correct_to_bounds( out->home, out->twin->home, out->next, ll, tr );
-    correct_to_bounds( in->home, in->twin->home, in, ll, tr );
-
-    // correct to lines
-
-    correct_to_edge( out->next->next, out->next, in, ll, tr );
-
-    bound_face( in->twin, ll, tr );
 }
 
 void bound_faces( face_list* list, vertex ll, vertex tr ) {
 
+    // smash in four corners
 
-    // find the first face that is not one of the four borders
-
-
-    // set bound face on it
-
+    // bound the four edges
     
     // remove four boundary faces
 }
