@@ -251,10 +251,9 @@ int test_site_event_insertion( void ) {
     return pass;
 }
 
-int test_fortune( void ) {
+int test_bounding( void ) {
 
     int pass = 1;
-
 
     vertex ll;
     vertex tr;
@@ -306,6 +305,97 @@ int test_fortune( void ) {
     printf("\n  Final face layout: \n");
 
     for ( int i = 0; i < 5; i++ ) {
+        print_face( &(flist->collection[i]) );
+    }
+
+    destroy_line( ln );
+    dispose_vertex_list( vlist );
+    destroy_face_list( flist );
+
+    return pass;
+}
+
+int test_multi_bounding( void ) {
+
+    int pass = 1;
+
+    vertex ll;
+    vertex tr;
+
+    ll.x = -20;
+    ll.y = -20;
+
+    tr.x = 20;
+    tr.y = 20;
+    
+    int list_size = 2;
+
+    vertex points[list_size];
+
+    points[0].x = -2;
+    points[0].y = 2;
+    points[1].x = -7;
+    points[1].y = 5;
+    // points[2].x = -9;
+    // points[2].y = 1;
+    // points[3].x = -1;
+    // points[3].y = 9;
+    // points[4].x = 2;
+    // points[4].y = 11;
+    // points[5].x = 3;
+    // points[5].y = -3;
+    // points[6].x = 7;
+    // points[6].y = -32;
+    // points[7].x = 8;
+    // points[7].y = 16;
+    // points[8].x = 9;
+    // points[8].y = -2;
+    // points[9].x = 6;
+    // points[9].y = 2;
+    
+    line* ln = create_line( ll, tr );
+    
+    vertex_list* vlist = create_vertex_list();
+    face_list* flist = create_face_list( points, list_size, ll, tr );
+
+    vertex_event* v_event = next_vertex_event( vlist );
+    face* s_event = pop_next_face( flist );
+
+    while ( v_event != NULL || s_event != NULL ) {
+
+        if ( (v_event != NULL) ^ (s_event != NULL) ) {
+
+            if ( v_event == NULL ) {
+                site_event( ln, s_event, vlist );
+                s_event = pop_next_face( flist );
+
+            } else {
+                circle_event( ln, v_event, vlist );
+                free( v_event );
+                v_event = next_vertex_event( vlist );
+            } 
+
+        } else {
+
+            if ( s_event->site.y >= v_event->sweep_y ) {
+                site_event( ln, s_event, vlist );
+                s_event = pop_next_face( flist );
+
+            } else {
+                circle_event( ln, v_event, vlist );
+                free( v_event );
+                v_event = next_vertex_event( vlist );
+            }
+        }
+    }
+
+    for ( int i = 0; i < flist->size; i++ ) {
+        print_face( &(flist->collection[i]) );
+    }
+
+    bound_faces( flist, ll, tr );
+
+    for ( int i = 0; i < flist->size; i++ ) {
         print_face( &(flist->collection[i]) );
     }
 

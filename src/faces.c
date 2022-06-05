@@ -270,23 +270,6 @@ void smash_in_corner( edge* to_set, vertex ll, vertex tr ) {
     }
 }
 
-// test face to detirmine if one of four
-int is_bound( edge* e, face** bounds_list ) {
-
-    if ( e->twin == NULL ) {
-        return 0;
-    }
-
-    face* f = e->twin->home;
-    int test = 0;
-
-    for ( int i = 0; i < 4; i++ ) {
-        test |= (f == bounds_list[i]) ? 1 : 0;
-    }
-
-    return test;
-}
-
 void bound_faces( face_list* list, vertex ll, vertex tr ) {
 
     // smash in four corners
@@ -298,7 +281,7 @@ void bound_faces( face_list* list, vertex ll, vertex tr ) {
 
     for ( int i = 0; i < 4; i++ ) {
 
-        while ( 0 == is_bound(e, list->bounds) ) {
+        while ( e->twin == NULL ) {
             e = e->next;
         }
 
@@ -315,7 +298,5 @@ void bound_faces( face_list* list, vertex ll, vertex tr ) {
     out_edge[3] = bound_face( out_edge[2], out_edge[3]->next, ll.x, 1);
     bound_face( out_edge[3], out_edge[0]->next, tr.y, 0);
 
-    // remove four boundary faces
-
-
+    // TODO: remove four boundary faces
 }
