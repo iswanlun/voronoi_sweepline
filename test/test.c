@@ -152,7 +152,10 @@ void print_face( face* f ) {
 }
 
 int test_site_event_insertion( void ) {
-    
+
+    int pass = 1;
+    float sweep_line_progression;
+
     vertex ll;
     vertex tr;
 
@@ -172,32 +175,19 @@ int test_site_event_insertion( void ) {
 
     face_list* flist = create_face_list( points, 1, ll, tr );
 
+    sweep_line_progression = flist->collection[0].site.y;
+
     printf("\n  Staring face stack: \n");
 
     for ( int i = 0; i < 5; i++ ) {
 
         print_face( &(flist->collection[i]) );
     }
-    
-    site_event( ln, pop_next_face( flist ), vlist );
 
-    printf("\n  After single site event: \n");
+    for ( int i = 0; i < 4; i++ ) {
 
-    for ( int i = 0; i < 5; i++ ) {
-
-        print_face( &(flist->collection[i]) );
-    }
-
-    site_event( ln, pop_next_face( flist ), vlist );
-
-    printf("\n  After second site event: \n");
-
-    for ( int i = 0; i < 5; i++ ) {
-
-        print_face( &(flist->collection[i]) );
-    }
-
-    for ( int i = 2; i < 4; i++ ) {
+        pass &= (sweep_line_progression >= peek_next_face( flist )->site.y ) ? 1 : 0;
+        sweep_line_progression = peek_next_face( flist )->site.y;
 
         site_event( ln, pop_next_face( flist ), vlist );
     }
@@ -210,6 +200,12 @@ int test_site_event_insertion( void ) {
     vertex_event* ve_next1 = next_vertex_event( vlist );
     vertex_event* ve_next2 = next_vertex_event( vlist );
 
+    pass &= (sweep_line_progression >= ve_next1->sweep_y) ? 1 : 0;
+    sweep_line_progression = ve_next1->sweep_y;
+
+    pass &= (sweep_line_progression >= ve_next2->sweep_y) ? 1 : 0; // this is circumstancial to point value
+    sweep_line_progression = ve_next2->sweep_y;
+
     printf("  Vertex event: x: %f y: %f s: %f \n",  ve_next1->v_site.x, ve_next1->v_site.y, ve_next1->sweep_y );
     printf("  Vertex event: x: %f y: %f s: %f \n",  ve_next2->v_site.x, ve_next2->v_site.y, ve_next2->sweep_y );
 
@@ -219,52 +215,103 @@ int test_site_event_insertion( void ) {
     free(ve_next1);
     free(ve_next2);
 
+    site_event( ln, pop_next_face( flist ), vlist );
 
-    for ( int i = 0; i < 4; i++ ) {
+    printf("\n  Vertex event count: %d \n", vlist->length );
+
+    ve_next1 = next_vertex_event( vlist );
+    ve_next2 = next_vertex_event( vlist );
+
+    pass &= (sweep_line_progression >= ve_next1->sweep_y) ? 1 : 0;
+    sweep_line_progression = ve_next1->sweep_y;
+
+    pass &= (sweep_line_progression >= ve_next2->sweep_y) ? 1 : 0; // this is circumstancial to point value
+    sweep_line_progression = ve_next2->sweep_y;
+
+    printf("  Vertex event: x: %f y: %f s: %f \n",  ve_next1->v_site.x, ve_next1->v_site.y, ve_next1->sweep_y );
+    printf("  Vertex event: x: %f y: %f s: %f \n",  ve_next2->v_site.x, ve_next2->v_site.y, ve_next2->sweep_y );
+
+    circle_event( ln, ve_next1, vlist );
+    circle_event( ln, ve_next2, vlist );
+
+    free(ve_next1);
+    free(ve_next2);
+
+    printf("\n  Final face layout: \n");
+
+    for ( int i = 0; i < 5; i++ ) {
 
         print_face( &(flist->collection[i]) );
     }
 
     destroy_line( ln );
     dispose_vertex_list( vlist );
+    destroy_face_list( flist );
 
-    return 1;
+    return pass;
 }
 
 int test_fortune( void ) {
 
-    vertex sites[3];
+    int pass = 1;
+
 
     vertex ll;
     vertex tr;
 
-    ll.x = 0;
-    ll.y = 0;
+    ll.x = -10;
+    ll.y = -10;
 
-    tr.x = 30;
-    tr.y = 30;
+    tr.x = 10;
+    tr.y = 10;
 
-    sites[0].x = 8;
-    sites[0].y = 14;
-    sites[1].x = 15;
-    sites[1].y = 14;
-    sites[3].x = 23;
-    sites[3].y = 14;
+    vertex points[1];
 
-    face_list* f_list = fortunes_sweep_line( sites, 3, ll, tr );
+    points[0].x = -1;
+    points[0].y = 6;
 
-    for ( int i = 0; i < f_list->size; i++ ) {
+    line* ln = create_line( ll, tr );
+    vertex_list* vlist = create_vertex_list();
 
-        edge* index = f_list->collection[i].top_edge;
+    face_list* flist = create_face_list( points, 1, ll, tr );
 
-        printf("  face - x: %f y: %f ", index->home->site.x, index->home->site.y );
+    for ( int i = 0; i < 4; i++ ) {
+        site_event( ln, pop_next_face( flist ), vlist );
+    }
 
-        do {
+    vertex_event* ve_next1 = next_vertex_event( vlist );
+    vertex_event* ve_next2 = next_vertex_event( vlist );
 
-            printf("    point - x: %f y: %f ", index->origin.x, index->origin.y );
+    circle_event( ln, ve_next1, vlist );
+    circle_event( ln, ve_next2, vlist );
 
-        } while ( index != f_list->collection[i].top_edge );
-    }    
+    free(ve_next1);
+    free(ve_next2);
 
-    return 1;
+    site_event( ln, pop_next_face( flist ), vlist );
+
+    ve_next1 = next_vertex_event( vlist );
+    ve_next2 = next_vertex_event( vlist );
+
+    circle_event( ln, ve_next1, vlist );
+    circle_event( ln, ve_next2, vlist );
+
+    free(ve_next1);
+    free(ve_next2);
+
+    printf("\n  Begin bounding... \n");
+
+    bound_faces( flist, ll, tr );
+
+    printf("\n  Final face layout: \n");
+
+    for ( int i = 0; i < 5; i++ ) {
+        print_face( &(flist->collection[i]) );
+    }
+
+    destroy_line( ln );
+    dispose_vertex_list( vlist );
+    destroy_face_list( flist );
+
+    return pass;
 }
