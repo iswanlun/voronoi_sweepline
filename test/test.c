@@ -358,37 +358,42 @@ int test_multi_bounding( void ) {
     vertex_list* vlist = create_vertex_list();
     face_list* flist = create_face_list( points, list_size, ll, tr );
 
-    vertex_event* v_event = next_vertex_event( vlist );
+    vertex_event* v_event = peek_vertex_event( vlist );
     face* s_event = pop_next_face( flist );
 
-    while ( v_event != NULL || s_event != NULL ) {
+    while ( s_event != NULL ) {
 
-        if ( (v_event != NULL) ^ (s_event != NULL) ) {
+        if ( v_event != NULL ) {
 
-            if ( v_event == NULL ) {
-                site_event( ln, s_event, vlist );
-                s_event = pop_next_face( flist );
+            if ( v_event->sweep_y > s_event->site.y ) {
 
-            } else {
+                v_event = next_vertex_event( vlist );
+
                 circle_event( ln, v_event, vlist );
                 free( v_event );
-                v_event = next_vertex_event( vlist );
-            } 
+
+            } else {
+                site_event( ln, s_event, vlist );
+                s_event = pop_next_face( flist );                
+            }
 
         } else {
-
-            if ( s_event->site.y >= v_event->sweep_y ) {
-                site_event( ln, s_event, vlist );
-                s_event = pop_next_face( flist );
-
-            } else {
-                circle_event( ln, v_event, vlist );
-                free( v_event );
-                v_event = next_vertex_event( vlist );
-            }
+            site_event( ln, s_event, vlist );
+            s_event = pop_next_face( flist );
         }
+
+        v_event = peek_vertex_event( vlist );
     }
 
+    v_event = next_vertex_event( vlist );
+
+    while ( v_event != NULL ) {
+
+        circle_event( ln, v_event, vlist );
+        free( v_event );
+        v_event = next_vertex_event( vlist );
+    }
+    
     for ( int i = 0; i < flist->size; i++ ) {
         print_face( &(flist->collection[i]) );
     }
