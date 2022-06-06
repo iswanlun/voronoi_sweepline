@@ -107,7 +107,7 @@ vertex break_point( arc* left, arc* right, float s ) {
     return fin;
 }
 
-void recalculate_vertex_event( arc* local, vertex_list* vlist, float s ) {
+void recalculate_vertex_event( arc* local, vertex_list* vlist ) {
 
     if ( local->next == NULL ||
          local->prev == NULL || 
@@ -214,11 +214,8 @@ void insert_face( arc* segment, face* parent, vertex_list* vlist ) {
 
     // recalulate vertex_events
 
-    float s = parent->site.y;
-
-    recalculate_vertex_event( new_left, vlist, s );
-    recalculate_vertex_event( new_center, vlist, s );
-    recalculate_vertex_event( segment, vlist, s );
+    recalculate_vertex_event( new_left, vlist );
+    recalculate_vertex_event( segment, vlist );
 }
 
 void site_event( line* ln, face* parent, vertex_list* vlist ) {
@@ -299,7 +296,6 @@ void circle_event( line* ln, vertex_event* v_event, vertex_list* vlist ) {
 
     strike_right->twin = strike_left;
     strike_left->twin = strike_right;
-    strike_left->origin = search->pinch->v_site;
 
     // right arc
 
@@ -313,6 +309,7 @@ void circle_event( line* ln, vertex_event* v_event, vertex_list* vlist ) {
     edge* left_lead = lead->next->twin;
     left_lead->next = strike_left;
     strike_left->next = search->prev->reverse;
+    strike_left->origin = search->pinch->v_site;
 
     // arc removal
 
@@ -322,12 +319,13 @@ void circle_event( line* ln, vertex_event* v_event, vertex_list* vlist ) {
     right->prev = left;
     left->next = right;
 
-    free(search->reverse);
-    free(search);
-
     // shift beach line head
 
-    if ( ln->bias > 1 ) {
+    if ( search == ln->head ) {
+
+        ln->head = right;
+
+    } else if ( ln->bias > 1 ) {
         ln->head = ln->head->next;
         ln->bias = 0;
 
@@ -336,8 +334,11 @@ void circle_event( line* ln, vertex_event* v_event, vertex_list* vlist ) {
         ln->bias = 0;
     }
 
-    recalculate_vertex_event( left, vlist, v_event->sweep_y );
-    recalculate_vertex_event( left, vlist, v_event->sweep_y );
+    free(search->reverse);
+    free(search);
+
+    recalculate_vertex_event( left, vlist );
+    recalculate_vertex_event( right, vlist );
 }
 
 line* create_line( vertex ll, vertex tr ) {
