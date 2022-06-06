@@ -4,7 +4,9 @@
 int test_face_creation( void );
 int test_vertex_events( void );
 int test_site_event_insertion( void );
-int test_bounding( void );
+int test_simple_bounding( void );
 int test_multi_bounding( void );
+int test_math_break_point( void );
+int test_math_circumcenter( void );
 
 #endif

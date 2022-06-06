@@ -251,7 +251,7 @@ int test_site_event_insertion( void ) {
     return pass;
 }
 
-int test_bounding( void ) {
+int test_simple_bounding( void ) {
 
     int pass = 1;
 
@@ -320,10 +320,54 @@ int test_math_break_point( void ) {
     int pass = 1;
 
 
+    arc* left = (arc*) malloc( sizeof(arc) );
+    arc* right = (arc*) malloc( sizeof(arc) );
+    
+    face* left_parent = (face*) malloc( sizeof(face) );
+    face* right_parent = (face*) malloc( sizeof(face) );
 
+    left->parent = left_parent;
+    right->parent = right_parent;
 
+    left_parent->site.x = -2; 
+    left_parent->site.y = 5;
 
+    right_parent->site.x = 2;
 
+    vertex result;
+
+    for ( int i = 0; i < 16; i++ ) {
+
+        right_parent->site.y = i;
+
+        result = break_point( left, right, -1 );
+
+        printf("  right y val: \t    %f \n", right_parent->site.y );
+        printf("  break point: \t x: %f \t y: %f \n", result.x, result.y );
+
+    }
+
+    left_parent->site.x = -2; 
+    left_parent->site.y = 5;
+
+    right_parent->site.x = -2;
+    right_parent->site.y = 10;
+
+    printf("\n  stacked reverse: \n");
+
+    result = break_point( left, right, -1 );
+
+    printf("  break point: \t x: %f \t y: %f \n", result.x, result.y );
+
+    result = break_point( right, left, -1 );
+
+    printf("  break point: \t x: %f \t y: %f \n", result.x, result.y );
+
+    free( left );
+    free( right );
+
+    free( left_parent );
+    free( right_parent );
 
     return pass;
 }
