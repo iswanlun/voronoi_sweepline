@@ -3,6 +3,7 @@
 #include "../src/fortune.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 int test_face_creation( void ) {
 
@@ -372,21 +373,85 @@ int test_math_break_point( void ) {
     return pass;
 }
 
+float point_distance( vertex v1, vertex v2 ) {
+
+    return sqrtf(powf((v2.x - v1.x), 2) + powf((v2.y - v1.y), 2));
+}
+
+int approx_equal( float f1, float f2 ) {
+
+    return ( (((f1 + 0.01) > f2) && f1 <= f2 ) || (((f2 + 0.01) > f1) && f2 <= f1 )) ? 1 : 0;
+}
+
+int test_no_event( vertex l, vertex c, vertex r ) {
+
+    return ( ((r.x - l.x)*(c.y - l.y)) - ((r.y - l.y)*(c.x - l.x)) );
+}
+
 int test_math_circumcenter( void ) {
 
     int pass = 1;
 
 
+    face* left_face = (face*) malloc( sizeof(face) );
+    face* center_face = (face*) malloc( sizeof(face) );
+    face* right_face = (face*) malloc( sizeof(face) );
+
+    arc* left = (arc*) malloc( sizeof(arc) );
+    arc* center = (arc*) malloc( sizeof(arc) );
+    arc* right = (arc*) malloc( sizeof(arc) );
+
+    center->prev = left;
+    left->next = center;
+
+    center->next = right;
+    right->prev = center;
+
+    left->parent = left_face;
+    center->parent = center_face;
+    right->parent = right_face;
+
+    left_face->site.x = -5;
+    left_face->site.y = -10;
+
+    center_face->site.x = 0;
+    center_face->site.y = -11;
+
+    right_face->site.x = 10;
+    right_face->site.y = 5;
+
+    vertex result;
+
+    for ( int i = 0; i < 35; i++ ) {
+
+        printf("\n    no event: %d \n", test_no_event( left_face->site, center_face->site, right_face->site ));
+
+        result = circumcenter( center );
+
+        printf("    circumcenter \t x: %f \t y: %f \n", result.x, result.y );
+
+        float d1 = point_distance( result, left_face->site );
+        float d2 = point_distance( result, center_face->site );
+        float d3 = point_distance( result, right_face->site );
+
+        pass &= approx_equal(d1, d2) & approx_equal(d2, d3);
+
+        center_face->site.y++;
+    }
+
+    
 
 
+    free( left_face);
+    free( center_face);
+    free( right_face);
 
-
-
+    free( left );
+    free( center );
+    free( right );
 
     return pass;
 }
-
-
 
 void print_vertex_event_list( vertex_list* vlist ) {
 
@@ -475,6 +540,8 @@ int test_multi_bounding( void ) {
     }
 
     bound_faces( flist, ll, tr );
+
+    printf("\n  bounding... \n\n");
 
     for ( int i = 0; i < flist->size; i++ ) {
         print_face( &(flist->collection[i]) );

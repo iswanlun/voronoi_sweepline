@@ -107,12 +107,16 @@ vertex break_point( arc* left, arc* right, float s ) {
     return fin;
 }
 
+int no_event( vertex l, vertex c, vertex r ) {
+
+    return (((r.x - l.x) * (c.y - l.y)) - ((r.y - l.y) * (c.x - l.x))) <= 0;
+}
+
 void recalculate_vertex_event( arc* local, vertex_list* vlist ) {
 
     if ( local->next == NULL ||
          local->prev == NULL || 
-        (local->prev->parent->site.y >= local->parent->site.y && 
-         local->next->parent->site.y >= local->parent->site.y) ) {
+         no_event( local->prev->parent->site, local->parent->site, local->next->parent->site)) {
         
         null_vertex_event( vlist, &(local->pinch) );
 
