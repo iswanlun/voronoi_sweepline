@@ -29,7 +29,7 @@ typedef struct face {
 
 typedef struct face_list {
 
-    face* collection;
+    face** collection;
 
     int size;
     int index;

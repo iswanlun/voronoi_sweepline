@@ -3,14 +3,14 @@
 #include <string.h>
 #include <limits.h>
 
-face* merge_faces( face* left, int lsize, face* right, int rsize ) {
+face** merge_faces( face** left, int lsize, face** right, int rsize ) {
 
-    face arr[lsize + rsize];
+    face* arr[lsize + rsize];
     int index = 0, l = 0, r = 0;
 
     while ( l < lsize && r < rsize ) {
 
-        if ( left[l].site.y > right[r].site.y ) {
+        if ( left[l]->site.y > right[r]->site.y ) {
 
             arr[index++] = left[l++];
 
@@ -30,23 +30,19 @@ face* merge_faces( face* left, int lsize, face* right, int rsize ) {
         }
     }
 
-    memcpy( left, arr, ((lsize + rsize) * sizeof(face)) );
+    memcpy( left, arr, ((lsize + rsize) * sizeof(face*)) );
     return left;
 }
 
-face* sort_faces( face* list, int size ) {
+void sort_faces( face** list, int size ) {
 
-    if ( size < 2 ) {
-        return list;
-
-    } else {
-
+    if ( size > 1 ) {
         int len = (size/2);
 
-        face* left = sort_faces( list, len );
-        face* right = sort_faces( &(list[len]), size-len );
+        sort_faces( list, len );
+        sort_faces( &(list[len]), size-len );
 
-        return merge_faces( left, len, right, size-len );
+        merge_faces( list, len, &(list[len]), size-len );
     }
 }
 
@@ -56,16 +52,17 @@ face_list* create_face_list( vertex* sites, int size, vertex ll, vertex tr ) {
     fin->size = (size + 4);
     fin->index = 0;
 
-    fin->collection = (face*) calloc( sizeof(face), (size + 4) );
+    fin->collection = (face**) calloc( sizeof(face*), (size + 4) );
 
     for ( int i = 0; i < size; i++ ) {
-        fin->collection[i].site = sites[i];
-        fin->collection[i].top_edge = create_edge( &(fin->collection[i]) );
+        fin->collection[i] = (face*) malloc( sizeof(face) );
+        fin->collection[i]->top_edge = create_edge( fin->collection[i] );
+        fin->collection[i]->site = sites[i];
     }
 
-    for ( int i = size; i < (size + 4); i++ ) {
-        
-        fin->collection[i].top_edge = create_edge( &(fin->collection[i]) );
+    for ( int i = size; i < fin->size; i++ ) {
+        fin->collection[i] = (face*) malloc( sizeof(face) );
+        fin->collection[i]->top_edge = create_edge( fin->collection[i] );
     }
 
     float height = tr.y - ll.y;
@@ -73,37 +70,37 @@ face_list* create_face_list( vertex* sites, int size, vertex ll, vertex tr ) {
 
     // 1 - Bounding points to remove
     int index = size;
-    fin->collection[index].site.x = ll.x - width; 
-    fin->collection[index].site.y = ((ll.y + tr.y) / 2);
+    fin->collection[index]->site.x = ll.x - width; 
+    fin->collection[index]->site.y = ((ll.y + tr.y) / 2);
 
     // 2
     index++;
-    fin->collection[index].site.x = ((ll.x + tr.x) / 2); 
-    fin->collection[index].site.y = tr.y + height;
+    fin->collection[index]->site.x = ((ll.x + tr.x) / 2); 
+    fin->collection[index]->site.y = tr.y + height;
 
     // 3
     index++;
-    fin->collection[index].site.x = tr.x + width; 
-    fin->collection[index].site.y = ((ll.y + tr.y) / 2);
+    fin->collection[index]->site.x = tr.x + width; 
+    fin->collection[index]->site.y = ((ll.y + tr.y) / 2);
 
     // 4
     index++;
-    fin->collection[index].site.x = ((ll.x + tr.x) / 2); 
-    fin->collection[index].site.y = ll.y - height;
+    fin->collection[index]->site.x = ((ll.x + tr.x) / 2); 
+    fin->collection[index]->site.y = ll.y - height;
 
     for ( int i = 0; i < 4; i++ ) {
-        fin->bounds[i] = &(fin->collection[index]);
-        index--;
+        fin->bounds[i] = fin->collection[index--];
     }
 
-    fin->collection = sort_faces( fin->collection, (size + 4) );
+    sort_faces( fin->collection, (size + 4) );
+
     return fin;
 }
 
 face* peek_next_face( face_list* list ) {
 
     if ( list->index < list->size ) {
-        return &(list->collection[list->index]);
+        return list->collection[list->index];
     } else {
         return NULL;
     }
@@ -113,8 +110,7 @@ face* pop_next_face( face_list* list ) {
 
     if ( list->index < list->size ) {
         
-        face* next = &(list->collection[list->index]);
-        list->index++;
+        face* next = list->collection[list->index++];
         return next;
 
     } else {
@@ -125,7 +121,7 @@ face* pop_next_face( face_list* list ) {
 void destroy_face_list( face_list* list ) {
 
     for ( int i = 0; i < list->size; i++ ) {
-        remove_face_edges( &(list->collection[i]) );
+        remove_face_edges( list->collection[i] );
     }
 
     free(list->collection);
@@ -163,12 +159,10 @@ vertex intersect( vertex f1, vertex f2, float line, int is_x ) {
     vertex fin;
 
     if ( f1.y == f2.y ) {
-
         fin.x = ( f1.x + f2.x ) / 2;
         fin.y = line;
 
     } else {
-        
         float m = ( -1 * (f2.x - f1.x)) / (f2.y - f1.y);
         float b = ((f2.y + f1.y) / 2) - (m * ((f2.x + f1.x) / 2));
         
@@ -182,24 +176,24 @@ vertex intersect( vertex f1, vertex f2, float line, int is_x ) {
             fin.x = ( line - b ) / ((m == 0) ? 1 : m);
             fin.y = line;
         }
-
     }
-
     return fin;
 }
 
 int is_crosscut( edge* e, float line, int is_x ) {
 
-    int test = 0;
+    float m, n;
 
     if ( is_x ) {
-        test |= ((e->origin.x >= line) ? 1 : 0) ^ ((e->next->origin.x >= line) ? 1 : 0);
+        m = e->origin.x;
+        n = e->next->origin.x;
 
     } else {
-        test |= ((e->origin.y >= line) ? 1 : 0) ^ ((e->next->origin.y >= line) ? 1 : 0);
+        m = e->origin.y;
+        n = e->next->origin.y;
     }
-
-    return test;
+    
+    return (( m < line ) && ( n > line )) || (( m > line ) && ( n < line ));
 }
 
 edge* bound_face( edge* out, edge* stop, float line, int is_x ) {
@@ -222,24 +216,20 @@ edge* bound_face( edge* out, edge* stop, float line, int is_x ) {
     } else {
         
         middle = out->next;
+        middle->home->top_edge = middle;
 
         while ( middle->next != in ) {
 
             edge* nn = middle->next->next;
-
-            if ( middle->home->top_edge == middle->next ) {
-                middle->home->top_edge = middle;
-            }
 
             free(middle->next);
             middle->next = nn;
         }
     }
 
-    // middle->origin = out->twin->origin;
-
     if ( in != stop ) {
         in->origin = intersect( in->home->site, in->twin->home->site, line, is_x );
+        in->twin->next->origin = in->origin;
         return bound_face( in->twin, stop, line, is_x );
     
     } else {
@@ -273,11 +263,8 @@ void smash_in_corner( edge* to_set, vertex ll, vertex tr ) {
 void bound_faces( face_list* list, vertex ll, vertex tr ) {
 
     // smash in four corners
-
-    face* top_bound = &(list->collection[0]);
-
     edge* out_edge[4];
-    edge* e = top_bound->top_edge;
+    edge* e = list->collection[0]->top_edge;
 
     for ( int i = 0; i < 4; i++ ) {
 
@@ -299,4 +286,11 @@ void bound_faces( face_list* list, vertex ll, vertex tr ) {
     bound_face( out_edge[3], out_edge[0]->next, tr.y, 0);
 
     // TODO: remove four boundary faces
+
+    for ( int i = 0; i < 4; i++ ) {
+
+
+
+
+    }
 }

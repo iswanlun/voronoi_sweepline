@@ -4,6 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <limits.h>
+
+#define filter_point(p) ((p == INT_MIN) ? 0 : p)
+#define filter_origin_x(e) ((e == NULL) ? 0 : filter_point(e->origin.x))
+#define filter_origin_y(e) ((e == NULL) ? 0 : filter_point(e->origin.y))
+
 
 int test_face_creation( void ) {
 
@@ -43,16 +49,16 @@ int test_face_creation( void ) {
     
     face_list* list = create_face_list( points, list_size, ll, tr );
 
-    float prev = list->collection[0].site.y;
+    float prev = list->collection[0]->site.y;
     int pass = 1;
 
     printf("  Face list:\n");
 
     for (int i = 0; i < list->size; i++ ) {
 
-        printf("    x: %f y: %f \n", list->collection[i].site.x, list->collection[i].site.y );
-        pass &= (prev >= list->collection[i].site.y) ? 1 : 0;
-        prev = list->collection[i].site.y;
+        printf("    x: %f y: %f \n", list->collection[i]->site.x, list->collection[i]->site.y );
+        pass &= (prev >= list->collection[i]->site.y) ? 1 : 0;
+        prev = list->collection[i]->site.y;
     }
 
     destroy_face_list( list );
@@ -133,6 +139,32 @@ int test_vertex_events( void ) {
     return pass;
 }
 
+void print_edge( edge* e) {
+
+    if ( e != NULL ) {
+
+        if ( e->origin.x != INT_MIN ) {
+            printf("(%f, %f)", e->origin.x, e->origin.y);
+        } else {
+            printf("--");
+        }
+
+    } else {
+        printf("--");
+    }
+}
+
+void print_twin( edge* e ) {
+    
+    if ( e != NULL ) {
+
+        printf("(%f, %f)", e->home->site.x, e->home->site.y);
+
+    } else {
+        printf("--");
+    }
+}
+
 void print_face( face* f ) {
 
     printf("  FACE - x: %f y: %f \n", f->site.x, f->site.y );
@@ -141,7 +173,11 @@ void print_face( face* f ) {
 
     do {
 
-        printf("    POINT: - x: %f y: %f \n", index->origin.x, index->origin.y );
+        printf("    POINT: ");
+        print_edge(index);
+        printf("    TWIN: ");
+        print_twin(index->twin);
+        printf("\n");
         index = index->next;
 
     } while ( index != NULL && index != f->top_edge );
@@ -176,13 +212,13 @@ int test_site_event_insertion( void ) {
 
     face_list* flist = create_face_list( points, 1, ll, tr );
 
-    sweep_line_progression = flist->collection[0].site.y;
+    sweep_line_progression = flist->collection[0]->site.y;
 
     printf("\n  Staring face stack: \n");
 
     for ( int i = 0; i < 5; i++ ) {
 
-        print_face( &(flist->collection[i]) );
+        print_face( flist->collection[i] );
     }
 
     for ( int i = 0; i < 4; i++ ) {
@@ -236,7 +272,7 @@ int test_site_event_insertion( void ) {
 
     for ( int i = 0; i < 5; i++ ) {
 
-        print_face( &(flist->collection[i]) );
+        print_face( flist->collection[i] );
     }
 
     destroy_line( ln );
@@ -294,7 +330,7 @@ int test_simple_bounding( void ) {
     printf("\n  Final face layout: \n");
 
     for ( int i = 0; i < 5; i++ ) {
-        print_face( &(flist->collection[i]) );
+        print_face( flist->collection[i] );
     }
 
     destroy_line( ln );
@@ -456,30 +492,31 @@ int test_multi_bounding( void ) {
     vertex ll;
     vertex tr;
 
-    ll.x = -15;
-    ll.y = -15;
+    ll.x = -10;
+    ll.y = -8;
 
-    tr.x = 15;
-    tr.y = 15;
+    tr.x = 10;
+    tr.y = 10;
     
-    int list_size = 5;
+    int list_size = 4;
 
     vertex points[list_size];
 
-    points[0].x = -2;
-    points[0].y = 7;
+    points[0].x = -3.7;
+    points[0].y = 5.64;
 
-    points[1].x = 3;
-    points[1].y = 5;
+    points[1].x = 5.94;
+    points[1].y = -2.9;
 
-    points[2].x = -9;
-    points[2].y = 5;
+    points[2].x = 7.84;
+    points[2].y = 5.7;
 
-    points[3].x = -1;
-    points[3].y = 9;
+    points[3].x = -4.5;
+    points[3].y = -7.56;
 
-    points[4].x = 2;
-    points[4].y = -6;
+    // points[4].x = 2;
+    // points[4].y = -6;
+
     // points[5].x = 3;
     // points[5].y = -3;
     // points[6].x = 7;
@@ -525,15 +562,15 @@ int test_multi_bounding( void ) {
     }
     
     for ( int i = 0; i < flist->size; i++ ) {
-        print_face( &(flist->collection[i]) );
+        print_face( flist->collection[i] );
     }
-
-    bound_faces( flist, ll, tr );
 
     printf("\n  bounding... \n\n");
 
+    bound_faces( flist, ll, tr );
+
     for ( int i = 0; i < flist->size; i++ ) {
-        print_face( &(flist->collection[i]) );
+        print_face( flist->collection[i] );
     }
 
     destroy_line( ln );
