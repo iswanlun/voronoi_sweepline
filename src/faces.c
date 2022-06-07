@@ -193,10 +193,10 @@ int is_crosscut( edge* e, float line, int is_x ) {
     int test = 0;
 
     if ( is_x ) {
-        test |= ((e->origin.x > line) ? 1 : 0) ^ ((e->next->origin.x > line) ? 1 : 0);
+        test |= ((e->origin.x >= line) ? 1 : 0) ^ ((e->next->origin.x >= line) ? 1 : 0);
 
     } else {
-        test |= ((e->origin.y > line) ? 1 : 0) ^ ((e->next->origin.y > line) ? 1 : 0);
+        test |= ((e->origin.y >= line) ? 1 : 0) ^ ((e->next->origin.y >= line) ? 1 : 0);
     }
 
     return test;
@@ -236,7 +236,7 @@ edge* bound_face( edge* out, edge* stop, float line, int is_x ) {
         }
     }
 
-    middle->origin = out->twin->origin;
+    // middle->origin = out->twin->origin;
 
     if ( in != stop ) {
         in->origin = intersect( in->home->site, in->twin->home->site, line, is_x );

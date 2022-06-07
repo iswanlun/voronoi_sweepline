@@ -187,7 +187,7 @@ int test_site_event_insertion( void ) {
 
     for ( int i = 0; i < 4; i++ ) {
 
-        pass &= (sweep_line_progression >= peek_next_face( flist )->site.y ) ? 1 : 0;
+        pass &= (peek_next_face( flist )->site.y <= sweep_line_progression) ? 1 : 0;
         sweep_line_progression = peek_next_face( flist )->site.y;
 
         site_event( ln, pop_next_face( flist ), vlist );
@@ -213,9 +213,6 @@ int test_site_event_insertion( void ) {
     circle_event( ln, ve_next1, vlist );
     circle_event( ln, ve_next2, vlist );
 
-    free(ve_next1);
-    free(ve_next2);
-
     site_event( ln, pop_next_face( flist ), vlist );
 
     printf("\n  Vertex event count: %d \n", vlist->length );
@@ -234,9 +231,6 @@ int test_site_event_insertion( void ) {
 
     circle_event( ln, ve_next1, vlist );
     circle_event( ln, ve_next2, vlist );
-
-    free(ve_next1);
-    free(ve_next2);
 
     printf("\n  Final face layout: \n");
 
@@ -285,9 +279,6 @@ int test_simple_bounding( void ) {
     circle_event( ln, ve_next1, vlist );
     circle_event( ln, ve_next2, vlist );
 
-    free(ve_next1);
-    free(ve_next2);
-
     site_event( ln, pop_next_face( flist ), vlist );
 
     ve_next1 = next_vertex_event( vlist );
@@ -295,9 +286,6 @@ int test_simple_bounding( void ) {
 
     circle_event( ln, ve_next1, vlist );
     circle_event( ln, ve_next2, vlist );
-
-    free(ve_next1);
-    free(ve_next2);
 
     printf("\n  Begin bounding... \n");
 
@@ -439,9 +427,6 @@ int test_math_circumcenter( void ) {
         center_face->site.y++;
     }
 
-    
-
-
     free( left_face);
     free( center_face);
     free( right_face);
@@ -477,20 +462,24 @@ int test_multi_bounding( void ) {
     tr.x = 15;
     tr.y = 15;
     
-    int list_size = 2;
+    int list_size = 5;
 
     vertex points[list_size];
 
     points[0].x = -2;
-    points[0].y = 5;
+    points[0].y = 7;
+
     points[1].x = 3;
     points[1].y = 5;
-    // points[2].x = -9;
-    // points[2].y = 1;
-    // points[3].x = -1;
-    // points[3].y = 9;
-    // points[4].x = 2;
-    // points[4].y = 11;
+
+    points[2].x = -9;
+    points[2].y = 5;
+
+    points[3].x = -1;
+    points[3].y = 9;
+
+    points[4].x = 2;
+    points[4].y = -6;
     // points[5].x = 3;
     // points[5].y = -3;
     // points[6].x = 7;
