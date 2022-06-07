@@ -471,11 +471,11 @@ int test_multi_bounding( void ) {
     vertex ll;
     vertex tr;
 
-    ll.x = -10;
-    ll.y = 0;
+    ll.x = -15;
+    ll.y = -15;
 
-    tr.x = 10;
-    tr.y = 10;
+    tr.x = 15;
+    tr.y = 15;
     
     int list_size = 2;
 
@@ -494,9 +494,9 @@ int test_multi_bounding( void ) {
     // points[5].x = 3;
     // points[5].y = -3;
     // points[6].x = 7;
-    // points[6].y = -32;
+    // points[6].y = -4;
     // points[7].x = 8;
-    // points[7].y = 16;
+    // points[7].y = 11;
     // points[8].x = 9;
     // points[8].y = -2;
     // points[9].x = 6;

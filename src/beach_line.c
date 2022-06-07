@@ -107,7 +107,7 @@ vertex break_point( arc* left, arc* right, float s ) {
     return fin;
 }
 
-int no_event( vertex l, vertex c, vertex r ) {
+static inline int no_event( vertex l, vertex c, vertex r ) {
 
     return (((r.x - l.x) * (c.y - l.y)) - ((r.y - l.y) * (c.x - l.x))) <= 0;
 }
@@ -116,7 +116,9 @@ void recalculate_vertex_event( arc* local, vertex_list* vlist ) {
 
     if ( local->next == NULL ||
          local->prev == NULL || 
-         no_event( local->prev->parent->site, local->parent->site, local->next->parent->site)) {
+         no_event( local->prev->parent->site, 
+                   local->parent->site, 
+                   local->next->parent->site )) {
         
         null_vertex_event( vlist, &(local->pinch) );
 
@@ -330,16 +332,17 @@ void circle_event( line* ln, vertex_event* v_event, vertex_list* vlist ) {
         ln->head = right;
 
     } else if ( ln->bias > 1 ) {
-        ln->head = ln->head->next;
+        ln->head = right;
         ln->bias = 0;
 
     } else if ( ln->bias < -1 ) {
-        ln->head = ln->head->prev;
+        ln->head = left;
         ln->bias = 0;
     }
 
-    free(search->reverse);
-    free(search);
+    free( search->reverse );
+    free( search );
+    free( v_event );
 
     recalculate_vertex_event( left, vlist );
     recalculate_vertex_event( right, vlist );
