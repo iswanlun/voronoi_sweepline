@@ -362,14 +362,27 @@ line* create_line( vertex ll, vertex tr ) {
 
 void destroy_line( line* ln ) {
 
-    arc* first = ln->head;
-    arc* index = ln->head->next;
+    if ( ln->head != NULL ) {
 
-    while( index != NULL && index != first ) {
-        arc* next = index->next;
-        free(index);
-        index = next;
+        arc* right = ln->head->next;
+        arc* left = ln->head->prev;
+
+        while ( right != NULL ) {
+
+            arc* tmp = right;
+            right = right->next;
+            free(tmp);
+        }
+
+        while ( left != NULL ) {
+
+            arc* tmp = left;
+            left = left->prev;
+            free(tmp);
+        }
+
+        free(ln->head);
     }
 
-    free(first);
+    free( ln );
 }

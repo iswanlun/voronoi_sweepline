@@ -1,4 +1,7 @@
 # link with -lm
 
 make: *.c
-	gcc -g -Wall $^ -lm
+	gcc $^ -c -O3 -lm 
+
+clean:
+	rm *.o
