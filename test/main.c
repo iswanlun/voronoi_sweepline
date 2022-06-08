@@ -1,7 +1,7 @@
 #include "test.h"
 #include <stdio.h>
 
-#define TEST_COUNT 7
+#define TEST_COUNT 8
 
 int main( void ) {
 
@@ -14,6 +14,7 @@ int main( void ) {
     tests[4] = &test_math_break_point;
     tests[5] = &test_math_circumcenter;
     tests[6] = &test_multi_bounding;
+    tests[7] = &test_fortune_line_sweep;
  
     for (int i = 0; i < TEST_COUNT; i++ ) {
 

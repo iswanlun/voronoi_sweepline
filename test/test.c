@@ -329,7 +329,7 @@ int test_simple_bounding( void ) {
 
     printf("\n  Final face layout: \n");
 
-    for ( int i = 0; i < 5; i++ ) {
+    for ( int i = 0; i < flist->size; i++ ) {
         print_face( flist->collection[i] );
     }
 
@@ -498,7 +498,7 @@ int test_multi_bounding( void ) {
     tr.x = 10;
     tr.y = 10;
     
-    int list_size = 4;
+    int list_size = 10;
 
     vertex points[list_size];
 
@@ -514,19 +514,19 @@ int test_multi_bounding( void ) {
     points[3].x = -4.5;
     points[3].y = -7.56;
 
-    // points[4].x = 2;
-    // points[4].y = -6;
+    points[4].x = 2;
+    points[4].y = -6;
 
-    // points[5].x = 3;
-    // points[5].y = -3;
-    // points[6].x = 7;
-    // points[6].y = -4;
-    // points[7].x = 8;
-    // points[7].y = 11;
-    // points[8].x = 9;
-    // points[8].y = -2;
-    // points[9].x = 6;
-    // points[9].y = 2;
+    points[5].x = 3;
+    points[5].y = -3;
+    points[6].x = 7;
+    points[6].y = -4;
+    points[7].x = 8;
+    points[7].y = 4;
+    points[8].x = 9;
+    points[8].y = -2;
+    points[9].x = 6;
+    points[9].y = 2;
     
     line* ln = create_line( ll, tr );
     
@@ -575,6 +575,72 @@ int test_multi_bounding( void ) {
 
     destroy_line( ln );
     dispose_vertex_list( vlist );
+    destroy_face_list( flist );
+
+    return pass;
+}
+
+void print_face_list( face_list* fl ) {
+
+    for ( int i = 0; i < fl->size; i++ ) {
+
+        printf("  FACE - x: %f y: %f \n", fl->collection[i]->site.x, fl->collection[i]->site.y );
+
+        edge* index = fl->collection[i]->top_edge;
+
+        do {
+
+            printf("    POINT: ");
+            print_edge(index);
+            printf("\n");
+            index = index->next;
+
+        } while ( index != fl->collection[i]->top_edge );
+    }
+}
+
+int test_fortune_line_sweep( void ) {
+
+    int pass = 1;
+
+    vertex ll;
+    vertex tr;
+
+    ll.x = -10;
+    ll.y = -8;
+
+    tr.x = 10;
+    tr.y = 10;
+    
+    int list_size = 10;
+
+    vertex points[list_size];
+
+    points[0].x = -3.7;
+    points[0].y = 5.64;
+    points[1].x = 5.94;
+    points[1].y = -2.9;
+    points[2].x = 7.84;
+    points[2].y = 5.7;
+    points[3].x = -4.5;
+    points[3].y = -7.56;
+    points[4].x = 2;
+    points[4].y = -6;
+    points[5].x = 3;
+    points[5].y = -3;
+    points[6].x = 7;
+    points[6].y = -4;
+    points[7].x = 8;
+    points[7].y = 4;
+    points[8].x = 9;
+    points[8].y = -2;
+    points[9].x = 6;
+    points[9].y = 2;
+
+    face_list* flist = fortunes_sweep_line( points, list_size, ll, tr );
+
+    print_face_list( flist );
+
     destroy_face_list( flist );
 
     return pass;

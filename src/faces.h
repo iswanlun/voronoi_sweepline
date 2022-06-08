@@ -46,8 +46,6 @@ face* pop_next_face( face_list* list );
 
 void destroy_face_list( face_list* list );
 
-void remove_face_edges( face* f );
-
 edge* create_edge( face* parent );
 
 void bound_faces( face_list* list, vertex ll, vertex tr );

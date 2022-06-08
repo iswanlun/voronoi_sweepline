@@ -37,7 +37,6 @@ face_list* fortunes_sweep_line( vertex* sites, int size, vertex ll, vertex tr ) 
     }
 
     bound_faces( flist, ll, tr );
-
     destroy_line( ln );
     dispose_vertex_list( vlist );
 

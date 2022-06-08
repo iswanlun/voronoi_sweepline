@@ -118,17 +118,7 @@ face* pop_next_face( face_list* list ) {
     }
 }
 
-void destroy_face_list( face_list* list ) {
-
-    for ( int i = 0; i < list->size; i++ ) {
-        remove_face_edges( list->collection[i] );
-    }
-
-    free(list->collection);
-    free(list);
-}
-
-void remove_face_edges( face* f ) {
+void destroy_face( face* f ) {
 
     edge* index = f->top_edge->next;
 
@@ -139,6 +129,17 @@ void remove_face_edges( face* f ) {
     }
 
     free(f->top_edge);
+    free(f);
+}
+
+void destroy_face_list( face_list* list ) {
+
+    for ( int i = 0; i < list->size; i++ ) {
+        destroy_face( list->collection[i] );
+    }
+
+    free(list->collection);
+    free(list);
 }
 
 edge* create_edge( face* parent ) {
@@ -289,8 +290,16 @@ void bound_faces( face_list* list, vertex ll, vertex tr ) {
 
     for ( int i = 0; i < 4; i++ ) {
 
+        face* f = list->bounds[i];
 
+        for ( int i = 0; i < list->size; i++ ) {
 
+            if ( list->collection[i] == f ) {
 
+                list->collection[i] = list->collection[--list->size];
+                destroy_face(f);
+                break;
+            }
+        }
     }
 }
