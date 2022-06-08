@@ -58,19 +58,15 @@ static inline float quad_x( float f, float h, float p, float k, float m, float b
 }
 
 /* Returns the value of the bp to the right */
-vertex break_point( arc* left, arc* right, float s ) {
-
-    vertex fin;
+float break_point( arc* left, arc* right, float s ) {
 
     if ( left == NULL ) {
 
-        fin.x = INT_MIN;
-        fin.y = 0;
+        return INT_MIN;
 
     } else if ( right == NULL ) {
 
-        fin.x = INT_MAX;
-        fin.y = 0;
+        return INT_MAX;
 
     } else {
 
@@ -82,8 +78,7 @@ vertex break_point( arc* left, arc* right, float s ) {
         float k = ( vleft.y - p );
 
         if ( vleft.y == vright.y ) {
-            fin.x = (vright.x + vleft.x) / 2 ;
-            fin.y = k + ( powf((fin.x - h), 2) / ( 4 * p ) );           
+            return (vright.x + vleft.x) / 2 ;      
 
         } else {
             float m = (-1) * ((vright.x - vleft.x) / ( vright.y - vleft.y ));
@@ -99,12 +94,9 @@ vertex break_point( arc* left, arc* right, float s ) {
                 x = MIN(x1, x2);
             }
 
-            fin.x = x;
-            fin.y = ((m * x) + b);
+            return x;
         }
     }
-
-    return fin;
 }
 
 static inline int no_event( vertex l, vertex c, vertex r ) {
@@ -132,9 +124,7 @@ void recalculate_vertex_event( arc* local, vertex_list* vlist ) {
 
 arc* search_left( arc* segment, float x, float s ) {
 
-    vertex v = break_point( segment->prev, segment, s );
-
-    if ( v.x < x ) {
+    if ( break_point( segment->prev, segment, s ) < x ) {
         return segment;
     } else {
         return search_left( segment->prev, x, s );
@@ -143,9 +133,7 @@ arc* search_left( arc* segment, float x, float s ) {
 
 arc* search_right( arc* segment, float x, float s ) {
 
-    vertex v = break_point( segment, segment->next, s );
-
-    if ( v.x > x ) {
+    if ( break_point( segment, segment->next, s ) > x ) {
         return segment;
     } else {
         return search_right( segment->next, x, s );
@@ -233,23 +221,20 @@ void site_event( line* ln, face* parent, vertex_list* vlist ) {
 
     arc* search = ln->head;
     float s = parent->site.y;
-    vertex bpl = break_point( search->prev, search, s );
-    vertex bpr = break_point( search, search->next, s );
 
-    if ( parent->site.x < bpl.x ) {
+    if ( parent->site.x < break_point( search->prev, search, s ) ) {
         
         search = search_left( search->prev, parent->site.x, s );
         insert_face( search, parent, vlist );
         ln->head = ln->head->prev;
 
-    } else if ( parent->site.x > bpr.x ) {
+    } else if ( parent->site.x > break_point( search, search->next, s ) ) {
         
         search = search_right( search->next, parent->site.x, s );
         insert_face( search, parent, vlist );
         ln->head = ln->head->next;
 
     } else {
-
         insert_face( search, parent, vlist );
         ln->head = ln->head->prev;
     }

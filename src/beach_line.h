@@ -33,8 +33,4 @@ void site_event( line* ln, face* parent, vertex_list* vlist );
 
 void circle_event( line* ln, vertex_event* v_event, vertex_list* vlist );
 
-vertex break_point( arc* left, arc* right, float s );
-
-vertex circumcenter( arc* local );
-
 #endif

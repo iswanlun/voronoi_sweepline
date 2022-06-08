@@ -1,7 +1,7 @@
 #include "test.h"
 #include <stdio.h>
 
-#define TEST_COUNT 8
+#define TEST_COUNT 6
 
 int main( void ) {
 
@@ -11,10 +11,8 @@ int main( void ) {
     tests[1] = &test_vertex_events;
     tests[2] = &test_site_event_insertion;
     tests[3] = &test_simple_bounding;
-    tests[4] = &test_math_break_point;
-    tests[5] = &test_math_circumcenter;
-    tests[6] = &test_multi_bounding;
-    tests[7] = &test_fortune_line_sweep;
+    tests[4] = &test_multi_bounding;
+    tests[5] = &test_fortune_line_sweep;
  
     for (int i = 0; i < TEST_COUNT; i++ ) {
 
