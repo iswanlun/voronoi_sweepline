@@ -11,7 +11,7 @@ a: beach_line.o events.o faces.o fortune.o
 o: beach_line.o events.o faces.o fortune.o
 
 %.o: %.c
-	$(CC) -c -Wall -Werror -fpic $^ -O3 -lm 
+	$(CC) -c -Wall -Werror -fpic $^
 
 clean:
-	rm *.o || rm *.so || rm *.a
+	rm *.o ; rm *.so ; rm *.a

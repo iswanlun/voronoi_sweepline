@@ -54,7 +54,7 @@ vertex circumcenter( arc* local ) {
 
 static inline float quad_x( float f, float h, float p, float k, float m, float b ) {
 
-    return (f * sqrtf(p) * sqrt( b + ( h * m ) - k + ( m * m * p ) )) + h + (2 * m * p);
+    return (f * sqrtf(p) * sqrtf( b + ( h * m ) - k + ( m * m * p ) )) + h + (2 * m * p);
 }
 
 /* Returns the value of the bp to the right */
