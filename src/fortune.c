@@ -1,4 +1,5 @@
-#include "fortune.h"
+#include "faces.h"
+#include "beach_line.h"
 #include "stddef.h"
 #include "limits.h"
 

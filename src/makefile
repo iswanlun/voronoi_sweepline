@@ -1,17 +1,17 @@
 # link with -lm
 CC = gcc
 
-libfortune.so: beach_line.o events.o faces.o fortune.o
-	$(CC) -shared -o $@ $^
+so: beach_line.o events.o faces.o fortune.o
+	$(CC) -shared -o libfortune.so $^
 
-libfortune.a: beach_line.o events.o faces.o fortune.o
-	ar rc $@ $^
-	ranlib $@
+a: beach_line.o events.o faces.o fortune.o
+	ar rc libfortune.a $^
+	ranlib libfortune.a
+
+o: beach_line.o events.o faces.o fortune.o
 
 %.o: %.c
 	$(CC) -c -Wall -Werror -fpic $^ -O3 -lm 
 
 clean:
-	rm *.o || \
-	rm *.so || \
-	rm *.a
+	rm *.o || rm *.so || rm *.a

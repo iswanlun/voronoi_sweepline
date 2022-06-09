@@ -1,4 +1,7 @@
 # link with -lm
 
-make: *.c ../src/beach_line.c ../src/events.c ../src/faces.c ../src/fortune.c
+test: *.c ../src/*.o
 	gcc -ggdb -Wall $^ -lm
+
+%.o:
+	make o -C ../src/
