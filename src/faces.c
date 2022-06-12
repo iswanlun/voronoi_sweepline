@@ -218,6 +218,7 @@ edge* bound_face( edge* out, edge* stop, float line, int is_x ) {
         
         middle = out->next;
         middle->home->top_edge = middle;
+        middle->twin = NULL;
 
         while ( middle->next != in ) {
 
